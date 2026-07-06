@@ -32,3 +32,11 @@ export function relativeTime(iso: string | null | undefined): string {
 export function formatScore(score: number): string {
   return Number.isInteger(score) ? String(score) : score.toFixed(1);
 }
+
+/** Compact number formatting, e.g. 133205 -> "133K". */
+export function compactNumber(n: number | null | undefined): string {
+  if (n == null) return "—";
+  if (n < 1000) return String(n);
+  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}K`;
+  return `${(n / 1_000_000).toFixed(1)}M`;
+}

@@ -24,14 +24,16 @@ from sqlalchemy import or_
 from sqlmodel import Session, select
 
 from app.core.logging import get_logger, log_ai
-from app.db.models import GeneratedContent, History, Trend
+from app.db.models import CompetitorVideo, GeneratedContent, History, Trend
 from app.db.session import engine
 from app.schemas.ai import (
     BRoll,
+    CompetitorGap,
     ContentStrategy,
     ContinuityBible,
     Hooks,
     ImagePrompts,
+    MultiIdeas,
     ProductionChecklist,
     Script,
     SEOPackage,
@@ -40,11 +42,14 @@ from app.schemas.ai import (
     ThumbnailStrategy,
     Titles,
     TrendAnalysis,
+    TrendForecast,
     TrendSummary,
+    UploadAdvice,
     VideoPrompts,
     VoiceOver,
 )
 from app.services.ai.formats import DEFAULT_FORMAT, get_format
+from app.services.intelligence.patterns import patterns_summary_text
 from app.services.ai.gemini_service import gemini_service
 from app.services.ai.prompt_manager import prompt_manager
 from app.services.ai.response_parser import parse_into
@@ -179,6 +184,59 @@ def _b_trend_only(session, trend, params, variant, base):
     return base
 
 
+# --- Sprint 5 builders ----------------------------------------------------
+
+def _competitor_titles(session: Session, limit: int = 25) -> str:
+    rows = session.exec(
+        select(CompetitorVideo).order_by(CompetitorVideo.views.desc()).limit(limit)
+    ).all()
+    if not rows:
+        return "(no competitor data collected)"
+    return "\n".join(f"- {v.title}" for v in rows if v.title)
+
+
+def _previously_used(session: Session, limit: int = 30) -> str:
+    """Gather previously generated idea/hook texts for duplicate protection."""
+    used: list[str] = []
+    rows = session.exec(
+        select(GeneratedContent).where(
+            GeneratedContent.kind.in_(["strategy", "multi_ideas", "hooks"])
+        )
+    ).all()
+    for row in rows:
+        data = (row.payload or {}).get("data", {})
+        for item in data.get("shorts", []) + data.get("long_videos", []):
+            if isinstance(item, dict) and item.get("idea"):
+                used.append(item["idea"])
+        for hook in data.get("hooks", []):
+            if isinstance(hook, dict) and hook.get("text"):
+                used.append(hook["text"])
+        if len(used) >= limit:
+            break
+    return "\n".join(f"- {u}" for u in used[:limit]) if used else ""
+
+
+def _b_forecast(session, trend, params, variant, base):
+    base["existing_coverage"] = _related_headlines(session, trend)
+    return base
+
+
+def _b_upload_advisor(session, trend, params, variant, base):
+    base["competitor_patterns"] = patterns_summary_text()
+    return base
+
+
+def _b_competitor_gap(session, trend, params, variant, base):
+    base["competitor_titles"] = _competitor_titles(session)
+    return base
+
+
+def _b_multi_ideas(session, trend, params, variant, base):
+    avoid = "" if params.get("_force") else _previously_used(session)
+    base["avoid_list"] = avoid or "(none yet)"
+    return base
+
+
 # --- generator registry ---------------------------------------------------
 
 @dataclass(frozen=True)
@@ -208,6 +266,11 @@ GENERATORS: dict[str, GenSpec] = {
     "thumbnail_blueprint": GenSpec("thumbnail_blueprint", ThumbnailBlueprint, _b_trend_only, uses_variant=True),
     "seo_package": GenSpec("seo_package", SEOPackage, _b_trend_only, uses_variant=True),
     "checklist": GenSpec("production_checklist", ProductionChecklist, _b_checklist, uses_variant=True),
+    # Sprint 5 — creator intelligence
+    "forecast": GenSpec("forecast", TrendForecast, _b_forecast),
+    "upload_advisor": GenSpec("upload_advisor", UploadAdvice, _b_upload_advisor),
+    "competitor_gap": GenSpec("competitor_gap", CompetitorGap, _b_competitor_gap),
+    "multi_ideas": GenSpec("multi_ideas", MultiIdeas, _b_multi_ideas),
 }
 
 # Ordered module list for a full content package (dependency order).
@@ -270,7 +333,9 @@ async def generate(trend_id: int, kind: str, *, params: dict | None = None, forc
             if stored is not None and stored.payload:
                 return _envelope(kind, trend_id, variant, stored.payload, stored, cached=True)
 
-        context = spec.builder(session, trend, params, variant, _base_context(trend))
+        context = spec.builder(
+            session, trend, {**params, "_force": force}, variant, _base_context(trend)
+        )
         trend_title = trend.title
 
     rendered, template = prompt_manager.render(spec.prompt, context)

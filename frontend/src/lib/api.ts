@@ -530,3 +530,166 @@ export const studioApi = {
     fmt: "md" | "json" = "md",
   ) => `${API_BASE_URL}/api/ai/export/${trendId}/${kind}${query({ format, fmt })}`,
 };
+
+// --- Sprint 5: Creator Intelligence types --------------------------------
+
+export interface CompetitorChannel {
+  id: number;
+  channel_id: string;
+  name: string;
+  handle: string;
+  thumbnail: string | null;
+  category: string;
+  video_count: number;
+  last_refreshed: string | null;
+  created_at: string;
+}
+
+export interface CompetitorVideo {
+  id: number;
+  channel_pk: number;
+  video_id: string;
+  title: string;
+  url: string | null;
+  thumbnail: string | null;
+  published: string | null;
+  views: number;
+  likes: number | null;
+  comments: number | null;
+  duration_seconds: number | null;
+  category: string;
+}
+
+export interface Patterns {
+  total_videos: number;
+  avg_views?: number;
+  median_views?: number;
+  max_views?: number;
+  top_videos?: { title: string; views: number; url: string | null; thumbnail: string | null }[];
+  upload_days?: Record<string, number>;
+  upload_hours?: Record<string, number>;
+  best_day?: string | null;
+  best_hour?: number | null;
+  frequency_per_week?: number | null;
+  title_keywords?: { word: string; count: number }[];
+  common_caps_words?: { word: string; count: number }[];
+}
+
+export interface Analytics {
+  trends_today: number;
+  total_trends: number;
+  ai_generations: number;
+  competitors: number;
+  content_packages: number;
+  top_categories: { category: string; count: number }[];
+  generations_by_kind: { kind: string; count: number }[];
+  most_used_hooks: { type: string; count: number }[];
+  weekly_activity: { day: string; count: number }[];
+  top_opportunities: { id: number; title: string; score: number; source: string }[];
+}
+
+export interface FavoriteItem {
+  id: number;
+  type: string;
+  label: string;
+  ref_id: number | null;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface ProjectItem {
+  trend_id: number | null;
+  variant: string;
+  title: string;
+  modules: string[];
+  module_count: number;
+  updated_at: string | null;
+  total_generation_ms: number;
+}
+
+export interface ForecastHorizon {
+  horizon: string;
+  direction: "rising" | "flat" | "declining" | string;
+  likelihood: number;
+  note: string;
+}
+export interface TrendForecast {
+  forecast_score: number;
+  confidence: number;
+  horizons: ForecastHorizon[];
+  reasoning: string;
+}
+
+export interface UploadAdvice {
+  best_day: string;
+  best_time: string;
+  ideal_length: string;
+  posting_frequency: string;
+  best_format: string;
+  target_audience: string;
+  reasoning: string;
+}
+
+export interface GapItem {
+  text: string;
+  rank: number;
+  why: string;
+}
+export interface CompetitorGap {
+  untapped_angles: GapItem[];
+  under_explored_questions: GapItem[];
+  new_perspectives: GapItem[];
+  emerging_discussions: GapItem[];
+}
+
+export interface MultiIdeas {
+  shorts: { idea: string; hook_angle: string; rank: number }[];
+  long_videos: { idea: string; angle: string; rank: number }[];
+  community_posts: { text: string; rank: number }[];
+  x_posts: { text: string; rank: number }[];
+  reels: { idea: string; rank: number }[];
+  carousels: { concept: string; slides: string[]; rank: number }[];
+  livestreams: { concept: string; rank: number }[];
+}
+
+export const competitorsApi = {
+  list: () => request<CompetitorChannel[]>("/api/competitors"),
+  add: (handle: string, category = "general") =>
+    request<CompetitorChannel>("/api/competitors", {
+      method: "POST",
+      body: JSON.stringify({ handle, category }),
+    }),
+  refreshAll: () => request<{ channels: number; new_videos: number }>("/api/competitors/refresh", { method: "POST" }),
+  refreshOne: (pk: number) =>
+    request<{ new_videos: number }>(`/api/competitors/${pk}/refresh`, { method: "POST" }),
+  remove: (pk: number) => request<void>(`/api/competitors/${pk}`, { method: "DELETE" }),
+  videos: (pk?: number) =>
+    request<CompetitorVideo[]>(pk != null ? `/api/competitors/${pk}/videos` : "/api/competitors/videos"),
+  patterns: (pk?: number) =>
+    request<Patterns>(`/api/competitors/patterns${query({ channel_pk: pk })}`),
+};
+
+export const favoritesApi = {
+  list: (type?: string, q?: string) =>
+    request<FavoriteItem[]>(`/api/favorites${query({ type, q })}`),
+  add: (fav: { type: string; label: string; ref_id?: number; payload?: Record<string, unknown> }) =>
+    request<FavoriteItem>("/api/favorites", { method: "POST", body: JSON.stringify(fav) }),
+  remove: (id: number) => request<void>(`/api/favorites/${id}`, { method: "DELETE" }),
+};
+
+export const intelligenceApi = {
+  analytics: () => request<Analytics>("/api/intelligence/analytics"),
+  projects: (q?: string, sort: "recent" | "modules" | "title" = "recent") =>
+    request<ProjectItem[]>(`/api/intelligence/projects${query({ q, sort })}`),
+};
+
+export const insightApi = {
+  forecast: (id: number, force = false) =>
+    request<AiEnvelope<TrendForecast>>(`/api/ai/forecast/${id}${query({ force: force ? "true" : undefined })}`, { method: "POST" }),
+  uploadAdvisor: (id: number, force = false) =>
+    request<AiEnvelope<UploadAdvice>>(`/api/ai/upload-advisor/${id}${query({ force: force ? "true" : undefined })}`, { method: "POST" }),
+  competitorGap: (id: number, force = false) =>
+    request<AiEnvelope<CompetitorGap>>(`/api/ai/competitor-gap/${id}${query({ force: force ? "true" : undefined })}`, { method: "POST" }),
+  multiIdeas: (id: number, force = false) =>
+    request<AiEnvelope<MultiIdeas>>(`/api/ai/multi-ideas/${id}${query({ force: force ? "true" : undefined })}`, { method: "POST" }),
+};

@@ -132,3 +132,4 @@
 {"ts": "2026-07-06T18:05:36+0530", "level": "INFO", "logger": "trendforge.performance", "category": "performance", "message": "package:generate completed", "operation": "package:generate", "duration_ms": 149.6, "trend_id": 1, "format": "60s"}
 {"ts": "2026-07-06T18:07:08+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "0.2.0"}
 {"ts": "2026-07-06T18:07:10+0530", "level": "INFO", "logger": "trendforge.performance", "category": "performance", "message": "package:generate completed", "operation": "package:generate", "duration_ms": 13.7, "trend_id": 1, "format": "60s"}
+{"ts": "2026-07-06T18:20:36+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "0.2.0"}

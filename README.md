@@ -94,5 +94,13 @@ The default backend port is **8756**.
   workspace (left: trend + format; center: storyboard timeline; right: module
   tabs; bottom: export) drives it all.
 
+- **Sprint 5** — Creator Intelligence & Competitive Analysis: track competitor
+  YouTube channels (via RSS, no API key), compute viral patterns (views, upload
+  timing, title keywords, frequency), AI content-gap finder, trend forecast,
+  upload advisor and a duplicate-protected multi-idea generator, plus favorites,
+  a projects/history browser and a local analytics dashboard. Surfaced in a new
+  **Intelligence** workspace with tabs (Overview, Competitors, Opportunities,
+  Forecast, History, Favorites, Analytics) and virtualized tables.
+
 To enable AI: open **Settings** in the app and paste your Gemini API key
 (or set `TRENDFORGE_GEMINI_API_KEY` in `backend/.env`).

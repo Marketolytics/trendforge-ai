@@ -120,6 +120,55 @@ class Setting(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=utcnow)
 
 
+class CompetitorChannel(SQLModel, table=True):
+    """A saved YouTube channel to track for competitive analysis."""
+
+    __tablename__ = "competitor_channels"
+
+    id: int | None = Field(default=None, primary_key=True)
+    channel_id: str = Field(index=True, description="YouTube UC... channel id")
+    name: str = Field(index=True)
+    handle: str = Field(default="", description="Original @handle or URL provided")
+    thumbnail: str | None = None
+    category: str = Field(default="general", index=True)
+    video_count: int = Field(default=0)
+    last_refreshed: datetime | None = Field(default=None)
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+
+
+class CompetitorVideo(SQLModel, table=True):
+    """A video collected from a tracked competitor channel."""
+
+    __tablename__ = "competitor_videos"
+
+    id: int | None = Field(default=None, primary_key=True)
+    channel_pk: int = Field(foreign_key="competitor_channels.id", index=True)
+    video_id: str = Field(index=True)
+    title: str
+    url: str | None = None
+    thumbnail: str | None = None
+    published: datetime | None = Field(default=None, index=True)
+    views: int = Field(default=0, index=True)
+    likes: int | None = None
+    comments: int | None = None
+    duration_seconds: int | None = None
+    category: str = Field(default="general")
+    collected_at: datetime = Field(default_factory=utcnow)
+
+
+class Favorite(SQLModel, table=True):
+    """A user-saved item (trend, script, prompt, hook, thumbnail, seo, ...)."""
+
+    __tablename__ = "favorites"
+
+    id: int | None = Field(default=None, primary_key=True)
+    type: str = Field(index=True, description="trend | script | prompt | hook | thumbnail | seo")
+    label: str = Field(index=True)
+    ref_id: int | None = Field(default=None, description="Related trend/content id")
+    payload: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+
+
 class CachedRequest(SQLModel, table=True):
     """A cached HTTP / API response keyed by a stable request signature."""
 

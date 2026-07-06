@@ -365,6 +365,63 @@ class ProductionChecklist(BaseModel):
 
 
 # ==========================================================================
+# Sprint 5 — Creator intelligence
+# ==========================================================================
+
+
+class ForecastHorizon(BaseModel):
+    horizon: str  # Tomorrow | 3 Days | 1 Week | 1 Month
+    direction: str = "flat"  # rising | flat | declining
+    likelihood: int = 0  # 0-100
+    note: str = ""
+
+
+class TrendForecast(BaseModel):
+    forecast_score: int = 0
+    confidence: int = 0
+    horizons: list[ForecastHorizon] = Field(default_factory=list)
+    reasoning: str = ""
+
+
+class UploadAdvice(BaseModel):
+    best_day: str = ""
+    best_time: str = ""
+    ideal_length: str = ""
+    posting_frequency: str = ""
+    best_format: str = ""
+    target_audience: str = ""
+    reasoning: str = ""
+
+
+class GapItem(BaseModel):
+    text: str
+    rank: int = 0
+    why: str = ""
+
+
+class CompetitorGap(BaseModel):
+    untapped_angles: list[GapItem] = Field(default_factory=list)
+    under_explored_questions: list[GapItem] = Field(default_factory=list)
+    new_perspectives: list[GapItem] = Field(default_factory=list)
+    emerging_discussions: list[GapItem] = Field(default_factory=list)
+
+
+class ReelIdea(BaseModel):
+    idea: str
+    rank: int = 0
+
+
+class MultiIdeas(BaseModel):
+    shorts: list[ShortIdea] = Field(default_factory=list)
+    long_videos: list[LongIdea] = Field(default_factory=list)
+    community_posts: list[RankedText] = Field(default_factory=list)
+    x_posts: list[RankedText] = Field(default_factory=list)
+    reels: list[ReelIdea] = Field(default_factory=list)
+    carousels: list[CarouselIdea] = Field(default_factory=list)
+    livestreams: list[LivestreamIdea] = Field(default_factory=list)
+
+
+# ==========================================================================
 
 
 class AIEnvelope(BaseModel):

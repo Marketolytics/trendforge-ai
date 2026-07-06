@@ -110,6 +110,31 @@ Package + export:
 - `GET  /api/ai/export/{id}/{kind}?format=&fmt=md|json` — export one module
 - `GET  /api/ai/export/{id}?format=` — export the whole package as a ZIP
 
+## Creator Intelligence (Sprint 5)
+
+Competitor tracking (YouTube RSS, no API key), viral pattern analysis, analytics
+and favorites — all local.
+
+- `GET    /api/competitors` — saved channels
+- `POST   /api/competitors` — add `{ handle, category }` (@handle, URL, or UC… id)
+- `POST   /api/competitors/refresh` — refresh all channels
+- `POST   /api/competitors/{pk}/refresh` — refresh one
+- `DELETE /api/competitors/{pk}` — remove a channel
+- `GET    /api/competitors/videos` — all collected videos
+- `GET    /api/competitors/{pk}/videos` — videos for one channel
+- `GET    /api/competitors/patterns?channel_pk=` — computed viral patterns
+
+- `GET    /api/intelligence/analytics` — local analytics dashboard data
+- `GET    /api/intelligence/projects?q=&sort=recent|modules|title` — generated projects
+
+- `GET    /api/favorites?type=&q=` · `POST /api/favorites` · `DELETE /api/favorites/{id}`
+
+Intelligence AI generators (trend-scoped, `?force=true` to regenerate):
+- `POST /api/ai/forecast/{id}` — growth forecast (tomorrow / 3d / 1w / 1m)
+- `POST /api/ai/upload-advisor/{id}` — best day/time/length/frequency/format/audience
+- `POST /api/ai/competitor-gap/{id}` — what competitors aren't covering, ranked
+- `POST /api/ai/multi-ideas/{id}` — full idea slate with duplicate protection
+
 ## Content (placeholder)
 
 - `GET /api/content/status`

@@ -179,6 +179,28 @@ async def generate_checklist(trend_id: int, format: str = Query(DEFAULT_FORMAT),
     return await _run(analyzer.generate(trend_id, "checklist", params=_params(format), force=force))
 
 
+# --- Sprint 5 intelligence generators (trend-scoped) ----------------------
+
+@router.post("/forecast/{trend_id}", response_model=AIEnvelope)
+async def generate_forecast(trend_id: int, force: bool = Query(False)) -> AIEnvelope:
+    return await _run(analyzer.generate(trend_id, "forecast", force=force))
+
+
+@router.post("/upload-advisor/{trend_id}", response_model=AIEnvelope)
+async def generate_upload_advisor(trend_id: int, force: bool = Query(False)) -> AIEnvelope:
+    return await _run(analyzer.generate(trend_id, "upload_advisor", force=force))
+
+
+@router.post("/competitor-gap/{trend_id}", response_model=AIEnvelope)
+async def generate_competitor_gap(trend_id: int, force: bool = Query(False)) -> AIEnvelope:
+    return await _run(analyzer.generate(trend_id, "competitor_gap", force=force))
+
+
+@router.post("/multi-ideas/{trend_id}", response_model=AIEnvelope)
+async def generate_multi_ideas(trend_id: int, force: bool = Query(False)) -> AIEnvelope:
+    return await _run(analyzer.generate(trend_id, "multi_ideas", force=force))
+
+
 # --- Package --------------------------------------------------------------
 
 class PackageResponse(BaseModel):

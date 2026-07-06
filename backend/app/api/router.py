@@ -7,9 +7,12 @@ from fastapi import APIRouter
 from app.api.routes import (
     ai,
     cache,
+    competitors,
     content,
+    favorites,
     health,
     history,
+    intelligence,
     settings,
     sources,
     trends,
@@ -23,4 +26,7 @@ api_router.include_router(history.router)
 api_router.include_router(settings.router)
 api_router.include_router(cache.router)
 api_router.include_router(ai.router)
+api_router.include_router(competitors.router)
+api_router.include_router(favorites.router)
+api_router.include_router(intelligence.router)
 api_router.include_router(content.router)

@@ -20,7 +20,10 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Production Studio",
     subtitle: "Turn a trend into a full, export-ready content package.",
   },
-  "/history": { title: "History", subtitle: "Everything you've generated." },
+  "/intelligence": {
+    title: "Creator Intelligence",
+    subtitle: "Competitors, gaps, forecasts, history, favorites and analytics.",
+  },
   "/settings": { title: "Settings", subtitle: "Sources, AI keys, preferences." },
 };
 
