@@ -208,6 +208,11 @@ async def generate_quality_review(
     return await _run(analyzer.generate(trend_id, "quality_review", params=_params(format), force=force))
 
 
+@router.post("/research/{trend_id}", response_model=AIEnvelope)
+async def generate_research(trend_id: int, force: bool = Query(False)) -> AIEnvelope:
+    return await _run(analyzer.generate(trend_id, "research", force=force))
+
+
 # --- Package --------------------------------------------------------------
 
 class PackageResponse(BaseModel):

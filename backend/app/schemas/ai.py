@@ -442,6 +442,73 @@ class QualityReview(BaseModel):
 
 
 # ==========================================================================
+# Sprint 7 — AI research verification & packaging
+# ==========================================================================
+
+
+class ResearchFacts(BaseModel):
+    confirmed: list[str] = Field(default_factory=list)
+    unconfirmed_claims: list[str] = Field(default_factory=list)
+    rumors: list[str] = Field(default_factory=list)
+    developer_statements: list[str] = Field(default_factory=list)
+    quotes: list[str] = Field(default_factory=list)
+    dates: list[str] = Field(default_factory=list)
+    locations: list[str] = Field(default_factory=list)
+
+
+class ResearchEntities(BaseModel):
+    games: list[str] = Field(default_factory=list)
+    characters: list[str] = Field(default_factory=list)
+    companies: list[str] = Field(default_factory=list)
+    developers: list[str] = Field(default_factory=list)
+    platforms: list[str] = Field(default_factory=list)
+    maps: list[str] = Field(default_factory=list)
+    vehicles: list[str] = Field(default_factory=list)
+    weapons: list[str] = Field(default_factory=list)
+    locations: list[str] = Field(default_factory=list)
+    events: list[str] = Field(default_factory=list)
+
+
+class ResearchKeywords(BaseModel):
+    trending: list[str] = Field(default_factory=list)
+    search_phrases: list[str] = Field(default_factory=list)
+    related_searches: list[str] = Field(default_factory=list)
+    topic_clusters: list[str] = Field(default_factory=list)
+    synonyms: list[str] = Field(default_factory=list)
+    emerging: list[str] = Field(default_factory=list)
+
+
+class ResearchVerification(BaseModel):
+    conflicts: list[str] = Field(default_factory=list)
+    missing_information: list[str] = Field(default_factory=list)
+    repeated_claims: list[str] = Field(default_factory=list)
+    weak_evidence: list[str] = Field(default_factory=list)
+    strong_evidence: list[str] = Field(default_factory=list)
+    possible_misinformation: list[str] = Field(default_factory=list)
+    confidence: int = 0
+
+
+class ResearchSummaries(BaseModel):
+    executive: str = ""
+    creator: str = ""
+    technical: str = ""
+    timeline: str = ""
+    community: str = ""
+
+
+class ResearchAI(BaseModel):
+    facts: ResearchFacts = Field(default_factory=ResearchFacts)
+    entities: ResearchEntities = Field(default_factory=ResearchEntities)
+    keywords: ResearchKeywords = Field(default_factory=ResearchKeywords)
+    verification: ResearchVerification = Field(default_factory=ResearchVerification)
+    summaries: ResearchSummaries = Field(default_factory=ResearchSummaries)
+    outstanding_questions: list[str] = Field(default_factory=list)
+    key_takeaways: list[str] = Field(default_factory=list)
+    best_creator_angle: str = ""
+    research_confidence: int = 0
+
+
+# ==========================================================================
 
 
 class AIEnvelope(BaseModel):

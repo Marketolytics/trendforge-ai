@@ -157,6 +157,22 @@ Developer panel + prompt engine tools:
 - `GET  /api/dev/generations?trend_id=&kind=` — AI generation history (for compare)
 - `GET  /api/dev/generations/{id}` — the exact prompt used + response
 
+## Smart Research Engine (Sprint 7)
+
+A deterministic base package (source confidence, story clustering, timeline,
+keyword & entity extraction, research graph) is built without AI and works
+offline; the AI verification layer enriches it with facts, misinformation
+detection and multi-audience summaries.
+
+- `GET  /api/research` — list built research packages
+- `GET  /api/research/{trend_id}?rebuild=` — base package (built on demand) + merged AI
+- `POST /api/research/{trend_id}/build` — (re)build the deterministic base
+- `POST /api/ai/research/{trend_id}` — AI verification layer (facts, entities, keywords, verification, summaries)
+
+The base package includes: `members` (clustered story items), `sources` (with
+confidence tiers), `timeline`, `keywords`, `entities`, `related_stories`,
+`graph` and an overall `research_confidence`.
+
 ## Content (placeholder)
 
 - `GET /api/content/status`

@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   TrendingUp,
+  Microscope,
   Clapperboard,
   Radar,
   Settings,
@@ -17,7 +18,8 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", to: "/", icon: LayoutDashboard, shortcut: "1" },
   { label: "Trends", to: "/trends", icon: TrendingUp, shortcut: "2" },
-  { label: "Studio", to: "/studio", icon: Clapperboard, shortcut: "3" },
-  { label: "Intelligence", to: "/intelligence", icon: Radar, shortcut: "4" },
-  { label: "Settings", to: "/settings", icon: Settings, shortcut: "5" },
+  { label: "Research", to: "/research", icon: Microscope, shortcut: "3" },
+  { label: "Studio", to: "/studio", icon: Clapperboard, shortcut: "4" },
+  { label: "Intelligence", to: "/intelligence", icon: Radar, shortcut: "5" },
+  { label: "Settings", to: "/settings", icon: Settings, shortcut: "6" },
 ];

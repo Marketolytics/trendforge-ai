@@ -23,6 +23,10 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Production Studio",
     subtitle: "Turn a trend into a full, export-ready content package.",
   },
+  "/research": {
+    title: "Research Workspace",
+    subtitle: "Multi-source intelligence: sources, timeline, facts and verification.",
+  },
   "/intelligence": {
     title: "Creator Intelligence",
     subtitle: "Competitors, gaps, forecasts, history, favorites and analytics.",
@@ -46,11 +50,10 @@ export function AppShell() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+  const prefixMeta = ["/studio", "/research"].find((p) => location.pathname.startsWith(p));
   const meta =
     PAGE_META[location.pathname] ??
-    (location.pathname.startsWith("/studio")
-      ? PAGE_META["/studio"]
-      : { title: "TrendForge AI", subtitle: "" });
+    (prefixMeta ? PAGE_META[prefixMeta] : { title: "TrendForge AI", subtitle: "" });
 
   // Keyboard shortcuts: 1-5 jump between modules.
   useEffect(() => {

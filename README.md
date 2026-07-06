@@ -110,5 +110,15 @@ The default backend port is **8756**.
   and robust per-stage retry. The UI adds a live **Job Monitor** and a
   **Developer panel** (⌃⇧D) showing queue/cache/DB stats, logs and prompt tools.
 
+- **Sprint 7** — Smart Research Engine & Multi-Source Intelligence: assembles the
+  single *story* behind many articles. A deterministic layer scores every source
+  by confidence tier, clusters duplicate coverage, builds an event timeline, and
+  extracts keywords, entities and a research graph — all offline, no key needed.
+  An AI verification layer then extracts confirmed facts vs rumors, flags possible
+  misinformation, and writes executive/creator/technical/timeline/community
+  summaries. A **Research** workspace (Overview, Timeline, Sources, Facts,
+  Entities, Community, Keywords, Verification) surfaces it with source badges,
+  confidence indicators and MD/JSON/print export.
+
 To enable AI: open **Settings** in the app and paste your Gemini API key
 (or set `TRENDFORGE_GEMINI_API_KEY` in `backend/.env`).

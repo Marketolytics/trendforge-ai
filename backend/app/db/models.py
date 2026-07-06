@@ -169,6 +169,27 @@ class Favorite(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow, index=True)
 
 
+class ResearchPackage(SQLModel, table=True):
+    """A deterministic research base package for a trend/story.
+
+    ``base`` holds source-confidence, story cluster, timeline, keywords,
+    entities and graph (all computed without AI). AI enrichment (facts,
+    verification, summaries) is stored separately in ``generated_content``
+    under kind ``research`` and merged on read.
+    """
+
+    __tablename__ = "research_packages"
+
+    id: int | None = Field(default=None, primary_key=True)
+    trend_id: int = Field(index=True)
+    title: str
+    base: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    confidence: float = Field(default=0.0)
+    source_count: int = Field(default=0)
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
 class Job(SQLModel, table=True):
     """A background workflow job coordinated by the orchestrator."""
 

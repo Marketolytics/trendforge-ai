@@ -42,6 +42,7 @@ from app.schemas.ai import (
     MultiIdeas,
     ProductionChecklist,
     QualityReview,
+    ResearchAI,
     Script,
     SEOPackage,
     Storyboard,
@@ -264,6 +265,24 @@ def _b_quality_review(session, trend, params, variant, base):
     return base
 
 
+def _b_research(session, trend, params, variant, base):
+    from app.services.research import engine as research_engine
+
+    pkg = research_engine.get_base(trend.id) or {}
+    members = pkg.get("members", [])
+    sources = [
+        {"source": s["source"], "tier": s.get("tier_label"), "count": s["count"]}
+        for s in pkg.get("sources", [])[:15]
+    ]
+    timeline = [
+        {"time": e["time"], "source": e["source"]} for e in pkg.get("timeline", [])[:25]
+    ]
+    base["research_sources"] = _json(sources)
+    base["research_timeline"] = _json(timeline)
+    base["research_cluster"] = "\n".join(f"- {m['title']}" for m in members[:30]) or "(no cluster)"
+    return base
+
+
 # --- generator registry ---------------------------------------------------
 
 @dataclass(frozen=True)
@@ -300,6 +319,8 @@ GENERATORS: dict[str, GenSpec] = {
     "multi_ideas": GenSpec("multi_ideas", MultiIdeas, _b_multi_ideas),
     # Sprint 6 — quality review (format-scoped, aggregates the project)
     "quality_review": GenSpec("quality_review", QualityReview, _b_quality_review, uses_variant=True),
+    # Sprint 7 — AI research verification
+    "research": GenSpec("research", ResearchAI, _b_research),
 }
 
 # Ordered module list for a full content package (dependency order).

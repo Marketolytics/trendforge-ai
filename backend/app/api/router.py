@@ -15,6 +15,7 @@ from app.api.routes import (
     history,
     intelligence,
     orchestrator,
+    research,
     settings,
     sources,
     trends,
@@ -32,5 +33,6 @@ api_router.include_router(competitors.router)
 api_router.include_router(favorites.router)
 api_router.include_router(intelligence.router)
 api_router.include_router(orchestrator.router)
+api_router.include_router(research.router)
 api_router.include_router(dev.router)
 api_router.include_router(content.router)

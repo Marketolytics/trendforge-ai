@@ -140,3 +140,6 @@
 {"ts": "2026-07-06T18:49:57+0530", "level": "INFO", "logger": "trendforge.ai", "category": "ai", "message": "stage opportunity failed", "job_id": "cdc1a18c3b564b848d03c0aae499b815", "stage": "opportunity", "attempts": 2, "duration_ms": 9}
 {"ts": "2026-07-06T18:49:57+0530", "level": "INFO", "logger": "trendforge.ai", "category": "ai", "message": "stage competitor_gap failed", "job_id": "cdc1a18c3b564b848d03c0aae499b815", "stage": "competitor_gap", "attempts": 2, "duration_ms": 11}
 {"ts": "2026-07-06T18:49:57+0530", "level": "INFO", "logger": "trendforge.ai", "category": "ai", "message": "job finished", "job_id": "cdc1a18c3b564b848d03c0aae499b815", "status": "failed", "completed": 0, "failed": 3}
+{"ts": "2026-07-06T19:14:54+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "0.2.0"}
+{"ts": "2026-07-06T19:14:54+0530", "level": "INFO", "logger": "trendforge.orchestrator", "category": "ai", "message": "orchestrator worker started"}
+{"ts": "2026-07-06T19:15:00+0530", "level": "INFO", "logger": "trendforge.research", "category": "general", "message": "research base built", "trend_id": 22, "members": 17, "sources": 7, "confidence": 62.0}

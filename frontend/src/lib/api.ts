@@ -786,3 +786,121 @@ export const devApi = {
       `/api/dev/generations/${id}`,
     ),
 };
+
+// --- Sprint 7: Research types --------------------------------------------
+
+export interface ResearchMember {
+  trend_id: number;
+  title: string;
+  summary: string | null;
+  source: string;
+  source_type: string;
+  url: string | null;
+  published: string | null;
+  tier: string;
+  tier_label: string;
+  score: number;
+}
+
+export interface ResearchSource {
+  source: string;
+  source_type: string;
+  tier: string;
+  tier_label: string;
+  score: number;
+  count: number;
+  latest: string | null;
+}
+
+export interface TimelineEvent {
+  time: string | null;
+  source: string;
+  title: string;
+  tier: string;
+}
+
+export interface ResearchBase {
+  seed_trend_id: number;
+  title: string;
+  member_count: number;
+  members: ResearchMember[];
+  sources: ResearchSource[];
+  timeline: TimelineEvent[];
+  keywords: {
+    trending: { word: string; count: number }[];
+    search_phrases: string[];
+    emerging: string[];
+    topic_clusters: { label: string; keywords: string[] }[];
+  };
+  entities: {
+    platforms: string[];
+    companies: string[];
+    topics: { name: string; count: number }[];
+  };
+  related_stories: { id: number; title: string; source: string }[];
+  graph: { nodes: { id: string; label: string; type: string }[]; edges: { from: string; to: string }[] };
+  research_confidence: number;
+  built_at: string;
+}
+
+export interface ResearchAI {
+  facts: {
+    confirmed: string[];
+    unconfirmed_claims: string[];
+    rumors: string[];
+    developer_statements: string[];
+    quotes: string[];
+    dates: string[];
+    locations: string[];
+  };
+  entities: Record<string, string[]>;
+  keywords: {
+    trending: string[];
+    search_phrases: string[];
+    related_searches: string[];
+    topic_clusters: string[];
+    synonyms: string[];
+    emerging: string[];
+  };
+  verification: {
+    conflicts: string[];
+    missing_information: string[];
+    repeated_claims: string[];
+    weak_evidence: string[];
+    strong_evidence: string[];
+    possible_misinformation: string[];
+    confidence: number;
+  };
+  summaries: {
+    executive: string;
+    creator: string;
+    technical: string;
+    timeline: string;
+    community: string;
+  };
+  outstanding_questions: string[];
+  key_takeaways: string[];
+  best_creator_angle: string;
+  research_confidence: number;
+}
+
+export interface ResearchResponse {
+  trend_id: number;
+  base: ResearchBase;
+  ai: ResearchAI | null;
+}
+
+export const researchApi = {
+  list: () =>
+    request<{ trend_id: number; title: string; confidence: number; source_count: number; updated_at: string }[]>(
+      "/api/research",
+    ),
+  get: (trendId: number, rebuild = false) =>
+    request<ResearchResponse>(`/api/research/${trendId}${query({ rebuild: rebuild ? "true" : undefined })}`),
+  build: (trendId: number) =>
+    request<ResearchResponse>(`/api/research/${trendId}/build`, { method: "POST" }),
+  enrich: (trendId: number, force = false) =>
+    request<AiEnvelope<ResearchAI>>(`/api/ai/research/${trendId}${query({ force: force ? "true" : undefined })}`, {
+      method: "POST",
+    }),
+};
