@@ -9,13 +9,24 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.config import settings
+from app.core.logging import configure_logging, get_logger
+from app.db.seed import seed_sources
 from app.db.session import init_db
+from app.services.settings_service import SettingsService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize resources on startup."""
+    settings.ensure_dirs()
+    configure_logging()
     init_db()
+    SettingsService.seed_defaults()
+    seed_sources()
+    get_logger("trendforge").info(
+        "TrendForge backend ready",
+        extra={"category": "general", "version": settings.version},
+    )
     yield
 
 

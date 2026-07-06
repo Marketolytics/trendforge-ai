@@ -1,5 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { RefreshCw, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useTrends } from "@/store/trends";
 import { BackendStatus } from "./BackendStatus";
 
 interface HeaderProps {
@@ -8,6 +11,10 @@ interface HeaderProps {
 }
 
 export function Header({ title, subtitle }: HeaderProps) {
+  const navigate = useNavigate();
+  const { refresh, status } = useTrends();
+  const refreshing = status === "refreshing";
+
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-[var(--border)] bg-[var(--background)]/80 px-6 backdrop-blur">
       <div className="min-w-0">
@@ -37,11 +44,16 @@ export function Header({ title, subtitle }: HeaderProps) {
 
       <div className="flex items-center gap-2">
         <BackendStatus />
-        <Button variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4" />
-          Refresh
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refresh()}
+          disabled={refreshing}
+        >
+          <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+          {refreshing ? "Refreshing" : "Refresh"}
         </Button>
-        <Button size="sm">
+        <Button size="sm" onClick={() => navigate("/generator")}>
           <Sparkles className="h-4 w-4" />
           Generate
         </Button>

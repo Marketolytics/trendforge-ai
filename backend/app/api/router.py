@@ -4,9 +4,21 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.routes import content, health, trends
+from app.api.routes import (
+    cache,
+    content,
+    health,
+    history,
+    settings,
+    sources,
+    trends,
+)
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(health.router)
 api_router.include_router(trends.router)
+api_router.include_router(sources.router)
+api_router.include_router(history.router)
+api_router.include_router(settings.router)
+api_router.include_router(cache.router)
 api_router.include_router(content.router)

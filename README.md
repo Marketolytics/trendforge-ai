@@ -66,4 +66,12 @@ npm run tauri dev
 
 ## Status
 
-Milestone 1 — application shell + local frontend/backend communication.
+- **Sprint 1** — application shell + local frontend/backend communication.
+- **Sprint 2** — core infrastructure & trend collection: config, SQLite schema,
+  structured rotating logs, TTL request cache, modular collectors (RSS, Google
+  Trends, Reddit, Steam, YouTube, gaming news, Rockstar), aggregation engine
+  (dedupe + cluster + preliminary scoring), documented API, and a live
+  dashboard. See `backend/API.md` for the API reference.
+
+The backend stores data under `backend/data/` (SQLite DB, logs, exports).
+The default backend port is **8756**.
