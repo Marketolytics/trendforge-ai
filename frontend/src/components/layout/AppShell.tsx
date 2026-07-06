@@ -16,9 +16,9 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Trends",
     subtitle: "Collected topics from every source.",
   },
-  "/generator": {
-    title: "Content Generator",
-    subtitle: "Turn a trend into a full content package.",
+  "/studio": {
+    title: "Production Studio",
+    subtitle: "Turn a trend into a full, export-ready content package.",
   },
   "/history": { title: "History", subtitle: "Everything you've generated." },
   "/settings": { title: "Settings", subtitle: "Sources, AI keys, preferences." },
@@ -27,10 +27,11 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const meta = PAGE_META[location.pathname] ?? {
-    title: "TrendForge AI",
-    subtitle: "",
-  };
+  const meta =
+    PAGE_META[location.pathname] ??
+    (location.pathname.startsWith("/studio")
+      ? PAGE_META["/studio"]
+      : { title: "TrendForge AI", subtitle: "" });
 
   // Keyboard shortcuts: 1-5 jump between modules.
   useEffect(() => {

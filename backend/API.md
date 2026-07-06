@@ -85,6 +85,31 @@ requests are free. Pass `?force=true` to regenerate. Requires a Gemini API key
 Prompts live in `app/services/ai/prompt_library/*.md` — versioned and editable
 without code changes (hot-reloaded on file change).
 
-## Content (placeholder — Sprint 4+)
+## AI Content Factory (Sprint 4)
+
+A "package" is all modules sharing a (trend, format) — e.g. `60s`. Modules
+persist in `generated_content` (keyed by trend + kind + variant) so repeats are
+free; `?force=true` regenerates. Dependencies are auto-loaded (storyboard reads
+the script; image/video prompts read the storyboard + continuity bible).
+
+- `GET  /api/ai/formats` — supported formats + voice styles
+- `POST /api/ai/script/{id}?format=` — retention script (hook/body/climax/CTA)
+- `POST /api/ai/storyboard/{id}?format=` — scene-by-scene storyboard
+- `POST /api/ai/continuity/{id}?format=` — scene-continuity bible
+- `POST /api/ai/image-prompts/{id}?format=` — per-scene Nano Banana prompts
+- `POST /api/ai/video-prompts/{id}?format=` — per-scene Veo/Runway/Pika/Luma prompts
+- `POST /api/ai/voiceover/{id}?format=&voice_style=` — AI-voice narration
+- `POST /api/ai/broll/{id}?format=` — B-roll shot list
+- `POST /api/ai/thumbnail-blueprint/{id}?format=` — thumbnail blueprint + CTR
+- `POST /api/ai/seo/{id}?format=` — SEO package
+- `POST /api/ai/checklist/{id}?format=` — production checklist
+
+Package + export:
+- `POST /api/ai/package/{id}?format=&voice_style=` — generate every module (409 if no key)
+- `GET  /api/ai/package/{id}?format=` — fetch stored modules for a format
+- `GET  /api/ai/export/{id}/{kind}?format=&fmt=md|json` — export one module
+- `GET  /api/ai/export/{id}?format=` — export the whole package as a ZIP
+
+## Content (placeholder)
 
 - `GET /api/content/status`

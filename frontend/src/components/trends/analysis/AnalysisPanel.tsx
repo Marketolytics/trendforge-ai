@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ExternalLink, X } from "lucide-react";
+import { Clapperboard, ExternalLink, X } from "lucide-react";
 import type { Trend } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { useTrends } from "@/store/trends";
 import { ScoreRing } from "../ScoreRing";
 import { OverviewTab } from "./OverviewTab";
@@ -44,7 +46,13 @@ function TabContent({ tab, trend }: { tab: TabKey; trend: Trend }) {
 
 function PanelInner({ trend }: { trend: Trend }) {
   const { closeTrend } = useTrends();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("overview");
+
+  const openStudio = () => {
+    closeTrend();
+    navigate(`/studio/${trend.id}`);
+  };
 
   // Reset to overview whenever a different trend opens.
   useEffect(() => setTab("overview"), [trend.id]);
@@ -79,13 +87,19 @@ function PanelInner({ trend }: { trend: Trend }) {
             )}
           </div>
         </div>
-        <button
-          onClick={closeTrend}
-          className="rounded-md p-1.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
-          aria-label="Close"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          <Button size="sm" onClick={openStudio}>
+            <Clapperboard className="h-4 w-4" />
+            Studio
+          </Button>
+          <button
+            onClick={closeTrend}
+            className="rounded-md p-1.5 text-[var(--muted-foreground)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}

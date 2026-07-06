@@ -72,15 +72,24 @@ class Trend(SQLModel, table=True):
 
 
 class GeneratedContent(SQLModel, table=True):
-    """AI-generated content package tied to a trend (filled in a later sprint)."""
+    """An AI-generated module tied to a trend.
+
+    A "content package" is the set of rows sharing a (trend_id, variant), where
+    ``variant`` is the chosen format/duration (e.g. "60s", "5min"). ``kind`` is
+    the module (script, storyboard, image_prompts, ...).
+    """
 
     __tablename__ = "generated_content"
 
     id: int | None = Field(default=None, primary_key=True)
     trend_id: int | None = Field(default=None, foreign_key="trends.id", index=True)
     title: str
-    kind: str = Field(default="package", description="package | script | prompt | seo")
+    kind: str = Field(default="package", index=True)
+    variant: str = Field(default="", index=True, description="Format/duration key")
     payload: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    params: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    prompt_version: str = Field(default="")
+    generation_ms: int = Field(default=0)
     status: str = Field(default="draft", description="draft | generated | exported")
     created_at: datetime = Field(default_factory=utcnow, index=True)
 

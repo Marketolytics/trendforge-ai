@@ -84,5 +84,15 @@ npm run tauri dev
 The backend stores data under `backend/data/` (SQLite DB, logs, exports).
 The default backend port is **8756**.
 
+- **Sprint 4** — AI Content Factory: one click turns a trend into a full,
+  export-ready production package — retention script (9 durations),
+  scene-by-scene storyboard, a scene-continuity engine, per-scene Nano Banana
+  image prompts and Veo/Runway/Pika/Luma video prompts (with character
+  continuity), voice-over, B-roll, thumbnail blueprint, SEO package and
+  production checklist. Everything is independently regenerable, cached, and
+  exportable individually (MD/JSON) or as one ZIP. The **Production Studio**
+  workspace (left: trend + format; center: storyboard timeline; right: module
+  tabs; bottom: export) drives it all.
+
 To enable AI: open **Settings** in the app and paste your Gemini API key
 (or set `TRENDFORGE_GEMINI_API_KEY` in `backend/.env`).

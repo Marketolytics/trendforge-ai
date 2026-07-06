@@ -191,14 +191,192 @@ class ThumbnailStrategy(BaseModel):
 # --- API envelopes --------------------------------------------------------
 
 
+# ==========================================================================
+# Sprint 4 — Content Factory modules
+# ==========================================================================
+
+
+class ScriptSegment(BaseModel):
+    label: str = "Body"
+    text: str = ""
+    seconds: float = 0.0
+    retention_marker: str = ""
+
+
+class Script(BaseModel):
+    format: str = ""
+    estimated_seconds: int = 0
+    hook: str = ""
+    segments: list[ScriptSegment] = Field(default_factory=list)
+    climax: str = ""
+    cta: str = ""
+    full_script: str = ""
+    retention_markers: list[str] = Field(default_factory=list)
+    pacing_notes: str = ""
+
+
+class Scene(BaseModel):
+    number: int = 0
+    duration_seconds: float = 0.0
+    narration: str = ""
+    visual: str = ""
+    camera_angle: str = ""
+    emotion: str = ""
+    transition: str = ""
+    sound_effect: str = ""
+    animation_notes: str = ""
+
+
+class Storyboard(BaseModel):
+    scenes: list[Scene] = Field(default_factory=list)
+    total_seconds: float = 0.0
+
+
+class ContinuityBible(BaseModel):
+    character_name: str = ""
+    character_appearance: str = ""
+    clothing: str = ""
+    hair: str = ""
+    environment: str = ""
+    time_of_day: str = ""
+    lighting: str = ""
+    camera_lens: str = ""
+    mood: str = ""
+    color_palette: str = ""
+    vehicle_position: str = ""
+    weather: str = ""
+
+
+class ImagePrompt(BaseModel):
+    scene_number: int = 0
+    prompt: str = ""
+    subject: str = ""
+    environment: str = ""
+    lighting: str = ""
+    lens: str = ""
+    camera_position: str = ""
+    composition: str = ""
+    art_direction: str = ""
+    style: str = ""
+    mood: str = ""
+    color_palette: str = ""
+    textures: str = ""
+    motion: str = ""
+    depth_of_field: str = ""
+    consistency_notes: str = ""
+    negative_prompt: str = ""
+    quality_settings: str = ""
+    aspect_ratio: str = "9:16"
+
+
+class ImagePrompts(BaseModel):
+    character_reference: str = ""
+    scenes: list[ImagePrompt] = Field(default_factory=list)
+
+
+class VideoPrompt(BaseModel):
+    scene_number: int = 0
+    prompt: str = ""
+    camera_motion: str = ""
+    animation: str = ""
+    object_motion: str = ""
+    facial_expressions: str = ""
+    wind: str = ""
+    lighting: str = ""
+    environment: str = ""
+    transitions: str = ""
+    physics: str = ""
+    realism: str = ""
+    continuity_note: str = ""
+    veo: str = ""
+    runway: str = ""
+    pika: str = ""
+    luma: str = ""
+
+
+class VideoPrompts(BaseModel):
+    scenes: list[VideoPrompt] = Field(default_factory=list)
+
+
+class VoiceSegment(BaseModel):
+    scene_number: int = 0
+    text: str = ""
+    direction: str = ""
+
+
+class VoiceOver(BaseModel):
+    style: str = ""
+    full_narration: str = ""
+    segments: list[VoiceSegment] = Field(default_factory=list)
+    tips: list[str] = Field(default_factory=list)
+
+
+class BRollItem(BaseModel):
+    category: str = ""
+    description: str = ""
+    timing: str = ""
+
+
+class BRoll(BaseModel):
+    suggestions: list[BRollItem] = Field(default_factory=list)
+
+
+class ThumbnailBlueprint(BaseModel):
+    main_subject: str = ""
+    emotion: str = ""
+    background: str = ""
+    lighting: str = ""
+    text: str = ""
+    font_style: str = ""
+    arrow_placement: str = ""
+    highlight_objects: list[str] = Field(default_factory=list)
+    color_contrast: str = ""
+    ctr_prediction: float = 0.0
+    notes: str = ""
+
+
+class CommunityPoll(BaseModel):
+    question: str = ""
+    options: list[str] = Field(default_factory=list)
+
+
+class SEOPackage(BaseModel):
+    title_variations: list[str] = Field(default_factory=list)
+    description: str = ""
+    tags: list[str] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
+    hashtags: list[str] = Field(default_factory=list)
+    pinned_comment: str = ""
+    community_poll: CommunityPoll = Field(default_factory=CommunityPoll)
+    playlist_recommendation: str = ""
+
+
+class ProductionChecklist(BaseModel):
+    voice_over: str = ""
+    visual_assets: list[str] = Field(default_factory=list)
+    image_prompts: str = ""
+    video_prompts: str = ""
+    thumbnail: str = ""
+    music_style: str = ""
+    sound_effects: list[str] = Field(default_factory=list)
+    editing_notes: list[str] = Field(default_factory=list)
+    subtitle_style: str = ""
+    final_review: list[str] = Field(default_factory=list)
+
+
+# ==========================================================================
+
+
 class AIEnvelope(BaseModel):
     """Standard wrapper for every AI endpoint response."""
 
     kind: str
     trend_id: int
+    variant: str = ""
     prompt_version: str
     cached: bool
     generated_at: str
+    generation_ms: int = 0
     data: dict
 
 

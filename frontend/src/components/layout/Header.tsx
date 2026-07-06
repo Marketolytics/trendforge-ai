@@ -53,9 +53,9 @@ export function Header({ title, subtitle }: HeaderProps) {
           <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
           {refreshing ? "Refreshing" : "Refresh"}
         </Button>
-        <Button size="sm" onClick={() => navigate("/generator")}>
+        <Button size="sm" onClick={() => navigate("/studio")}>
           <Sparkles className="h-4 w-4" />
-          Generate
+          Studio
         </Button>
       </div>
     </header>

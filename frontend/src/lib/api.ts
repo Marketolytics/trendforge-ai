@@ -91,9 +91,11 @@ export interface AppSettings {
 export interface AiEnvelope<T> {
   kind: string;
   trend_id: number;
+  variant?: string;
   prompt_version: string;
   cached: boolean;
   generated_at: string;
+  generation_ms?: number;
   data: T;
 }
 
@@ -217,6 +219,188 @@ export interface ContentStrategy {
   livestreams: { concept: string; rank: number }[];
 }
 
+// --- Content Factory (Sprint 4) types -------------------------------------
+
+export interface FormatInfo {
+  key: string;
+  label: string;
+  seconds: number;
+  kind: "short" | "long" | string;
+}
+
+export interface FormatsResponse {
+  formats: FormatInfo[];
+  voice_styles: string[];
+  default: string;
+}
+
+export interface ScriptSegment {
+  label: string;
+  text: string;
+  seconds: number;
+  retention_marker: string;
+}
+export interface Script {
+  format: string;
+  estimated_seconds: number;
+  hook: string;
+  segments: ScriptSegment[];
+  climax: string;
+  cta: string;
+  full_script: string;
+  retention_markers: string[];
+  pacing_notes: string;
+}
+
+export interface Scene {
+  number: number;
+  duration_seconds: number;
+  narration: string;
+  visual: string;
+  camera_angle: string;
+  emotion: string;
+  transition: string;
+  sound_effect: string;
+  animation_notes: string;
+}
+export interface Storyboard {
+  scenes: Scene[];
+  total_seconds: number;
+}
+
+export interface ContinuityBible {
+  character_name: string;
+  character_appearance: string;
+  clothing: string;
+  hair: string;
+  environment: string;
+  time_of_day: string;
+  lighting: string;
+  camera_lens: string;
+  mood: string;
+  color_palette: string;
+  vehicle_position: string;
+  weather: string;
+}
+
+export interface ImagePrompt {
+  scene_number: number;
+  prompt: string;
+  [key: string]: string | number;
+}
+export interface ImagePrompts {
+  character_reference: string;
+  scenes: ImagePrompt[];
+}
+
+export interface VideoPrompt {
+  scene_number: number;
+  prompt: string;
+  camera_motion: string;
+  animation: string;
+  object_motion: string;
+  facial_expressions: string;
+  transitions: string;
+  physics: string;
+  continuity_note: string;
+  veo: string;
+  runway: string;
+  pika: string;
+  luma: string;
+  [key: string]: string | number;
+}
+export interface VideoPrompts {
+  scenes: VideoPrompt[];
+}
+
+export interface VoiceOver {
+  style: string;
+  full_narration: string;
+  segments: { scene_number: number; text: string; direction: string }[];
+  tips: string[];
+}
+
+export interface BRoll {
+  suggestions: { category: string; description: string; timing: string }[];
+}
+
+export interface ThumbnailBlueprint {
+  main_subject: string;
+  emotion: string;
+  background: string;
+  lighting: string;
+  text: string;
+  font_style: string;
+  arrow_placement: string;
+  highlight_objects: string[];
+  color_contrast: string;
+  ctr_prediction: number;
+  notes: string;
+}
+
+export interface SEOPackage {
+  title_variations: string[];
+  description: string;
+  tags: string[];
+  keywords: string[];
+  hashtags: string[];
+  pinned_comment: string;
+  community_poll: { question: string; options: string[] };
+  playlist_recommendation: string;
+}
+
+export interface ProductionChecklist {
+  voice_over: string;
+  visual_assets: string[];
+  image_prompts: string;
+  video_prompts: string;
+  thumbnail: string;
+  music_style: string;
+  sound_effects: string[];
+  editing_notes: string[];
+  subtitle_style: string;
+  final_review: string[];
+}
+
+export type ModuleKind =
+  | "script"
+  | "storyboard"
+  | "continuity"
+  | "image_prompts"
+  | "video_prompts"
+  | "voiceover"
+  | "broll"
+  | "thumbnail_blueprint"
+  | "seo_package"
+  | "checklist";
+
+export interface PackageResponse {
+  trend_id: number;
+  variant: string;
+  format: string;
+  modules: Partial<Record<ModuleKind, AiEnvelope<Record<string, unknown>>>>;
+  failures: { kind: string; error: string }[];
+}
+
+const MODULE_PATHS: Record<ModuleKind, string> = {
+  script: "script",
+  storyboard: "storyboard",
+  continuity: "continuity",
+  image_prompts: "image-prompts",
+  video_prompts: "video-prompts",
+  voiceover: "voiceover",
+  broll: "broll",
+  thumbnail_blueprint: "thumbnail-blueprint",
+  seo_package: "seo",
+  checklist: "checklist",
+};
+
+interface ModuleOpts {
+  format: string;
+  voiceStyle?: string;
+  force?: boolean;
+}
+
 // --- Error + request helper ----------------------------------------------
 
 export class ApiError extends Error {
@@ -306,4 +490,43 @@ export const aiApi = {
   hooks: (id: number, force = false) => aiPost<HooksData>("hooks", id, force),
   titles: (id: number, force = false) => aiPost<TitlesData>("titles", id, force),
   thumbnail: (id: number, force = false) => aiPost<ThumbnailStrategy>("thumbnail", id, force),
+};
+
+// --- Studio / Content Factory API -----------------------------------------
+
+export const studioApi = {
+  formats: () => request<FormatsResponse>("/api/ai/formats"),
+
+  getPackage: (trendId: number, format: string) =>
+    request<PackageResponse>(`/api/ai/package/${trendId}${query({ format })}`),
+
+  generatePackage: (trendId: number, opts: ModuleOpts) =>
+    request<PackageResponse>(
+      `/api/ai/package/${trendId}${query({
+        format: opts.format,
+        voice_style: opts.voiceStyle,
+        force: opts.force ? "true" : undefined,
+      })}`,
+      { method: "POST" },
+    ),
+
+  generateModule: (kind: ModuleKind, trendId: number, opts: ModuleOpts) =>
+    request<AiEnvelope<Record<string, unknown>>>(
+      `/api/ai/${MODULE_PATHS[kind]}/${trendId}${query({
+        format: opts.format,
+        voice_style: kind === "voiceover" ? opts.voiceStyle : undefined,
+        force: opts.force ? "true" : undefined,
+      })}`,
+      { method: "POST" },
+    ),
+
+  exportPackageUrl: (trendId: number, format: string) =>
+    `${API_BASE_URL}/api/ai/export/${trendId}${query({ format })}`,
+
+  exportModuleUrl: (
+    trendId: number,
+    kind: ModuleKind,
+    format: string,
+    fmt: "md" | "json" = "md",
+  ) => `${API_BASE_URL}/api/ai/export/${trendId}/${kind}${query({ format, fmt })}`,
 };
