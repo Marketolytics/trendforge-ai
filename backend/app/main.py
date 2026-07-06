@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from datetime import UTC
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -53,6 +54,15 @@ async def lifespan(app: FastAPI):
 
     orchestrator.start_worker()
     orchestrator.resume_pending()
+
+    # First-run marker (workspace/db/migrations above are idempotent every start).
+    if SettingsService.get("initialized_at") is None:
+        from datetime import datetime
+
+        SettingsService.set("initialized_at", datetime.now(UTC).isoformat())
+        get_logger("trendforge").info(
+            "first-run initialization complete", extra={"category": "general"}
+        )
 
     # Optional automatic backup on startup.
     if SettingsService.all(mask_secrets=False).get("auto_backup"):

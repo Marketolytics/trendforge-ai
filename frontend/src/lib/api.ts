@@ -5,8 +5,19 @@
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:8756";
 
-export const API_BASE_URL =
+// The backend URL is resolved at startup (auto-discovered under Tauri, or the
+// default in the browser). It's mutable so the desktop launcher can point the
+// UI at whichever local port the backend actually bound to.
+let _apiBaseUrl =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? DEFAULT_BASE_URL;
+
+export function getApiBaseUrl(): string {
+  return _apiBaseUrl;
+}
+
+export function setApiBaseUrl(url: string): void {
+  _apiBaseUrl = url.replace(/\/$/, "");
+}
 
 // --- Types ----------------------------------------------------------------
 
@@ -422,7 +433,7 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE_URL}${path}`, {
+    res = await fetch(`${getApiBaseUrl()}${path}`, {
       headers: { "Content-Type": "application/json" },
       ...init,
     });
@@ -527,14 +538,14 @@ export const studioApi = {
     ),
 
   exportPackageUrl: (trendId: number, format: string) =>
-    `${API_BASE_URL}/api/ai/export/${trendId}${query({ format })}`,
+    `${getApiBaseUrl()}/api/ai/export/${trendId}${query({ format })}`,
 
   exportModuleUrl: (
     trendId: number,
     kind: ModuleKind,
     format: string,
     fmt: "md" | "json" = "md",
-  ) => `${API_BASE_URL}/api/ai/export/${trendId}/${kind}${query({ format, fmt })}`,
+  ) => `${getApiBaseUrl()}/api/ai/export/${trendId}/${kind}${query({ format, fmt })}`,
 };
 
 // --- Sprint 5: Creator Intelligence types --------------------------------
@@ -937,21 +948,47 @@ export interface UpdateInfo {
   error?: string;
 }
 
+export interface HealthReport {
+  backend: string;
+  database: string;
+  cache: string;
+  workspace: string;
+  ai_provider: { configured: boolean; provider: string };
+  network: string;
+  first_run: boolean;
+  issues: string[];
+  healthy: boolean;
+}
+
+export interface Diagnostics {
+  version: string;
+  backend_port: number;
+  workspace: Record<string, string>;
+  database_path: string;
+  log_dir: string;
+  ai_provider: { provider: string; configured: boolean; models: Record<string, string> };
+  cache: { total: number; fresh: number; expired: number };
+  queue: { queue_size: number; worker_running: boolean; by_status: Record<string, number>; total: number };
+  running_jobs: number;
+}
+
 export const systemApi = {
   version: () => request<VersionInfo>("/api/version"),
   updateCheck: () => request<UpdateInfo>("/api/update-check", { method: "POST" }),
+  healthReport: () => request<HealthReport>("/api/system/health-report"),
+  diagnostics: () => request<Diagnostics>("/api/system/diagnostics"),
 };
 
 export const backupApi = {
-  downloadUrl: () => `${API_BASE_URL}/api/backup`,
+  downloadUrl: () => `${getApiBaseUrl()}/api/backup`,
   restore: async (file: File) => {
     const form = new FormData();
     form.append("file", file);
-    const res = await fetch(`${API_BASE_URL}/api/backup/restore`, { method: "POST", body: form });
+    const res = await fetch(`${getApiBaseUrl()}/api/backup/restore`, { method: "POST", body: form });
     if (!res.ok) throw new ApiError(`Restore failed (${res.status})`, res.status);
     return res.json() as Promise<{ ok: boolean; restart_recommended: boolean }>;
   },
-  exportProjectUrl: (trendId: number) => `${API_BASE_URL}/api/backup/project/${trendId}`,
+  exportProjectUrl: (trendId: number) => `${getApiBaseUrl()}/api/backup/project/${trendId}`,
   importProject: (bundle: unknown) =>
     request<{ ok: boolean; trend_id: number }>("/api/backup/project", {
       method: "POST",

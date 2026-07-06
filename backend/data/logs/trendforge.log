@@ -149,3 +149,8 @@
 {"ts": "2026-07-06T20:16:46+0530", "level": "INFO", "logger": "trendforge.orchestrator", "category": "ai", "message": "orchestrator worker started"}
 {"ts": "2026-07-06T20:19:06+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "1.0.0"}
 {"ts": "2026-07-06T20:19:06+0530", "level": "INFO", "logger": "trendforge.orchestrator", "category": "ai", "message": "orchestrator worker started"}
+{"ts": "2026-07-06T20:37:25+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "first-run initialization complete"}
+{"ts": "2026-07-06T20:37:25+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "1.0.0"}
+{"ts": "2026-07-06T20:37:25+0530", "level": "INFO", "logger": "trendforge.orchestrator", "category": "ai", "message": "orchestrator worker started"}
+{"ts": "2026-07-06T20:50:00+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "1.0.0"}
+{"ts": "2026-07-06T20:50:00+0530", "level": "INFO", "logger": "trendforge.orchestrator", "category": "ai", "message": "orchestrator worker started"}

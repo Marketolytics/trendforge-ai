@@ -3,6 +3,7 @@ import { RouterProvider } from "react-router-dom";
 import { Toaster } from "sonner";
 import { router } from "@/routes";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { StartupGate } from "@/components/common/StartupGate";
 import { applyTheme, getTheme } from "@/lib/theme";
 
 export default function App() {
@@ -13,7 +14,9 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <StartupGate>
+        <RouterProvider router={router} />
+      </StartupGate>
       <Toaster
         theme="dark"
         position="bottom-right"

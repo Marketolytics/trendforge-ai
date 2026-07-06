@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sidebar } from "./Sidebar";
@@ -11,7 +11,9 @@ import { JobMonitor } from "@/components/jobs/JobMonitor";
 import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { UpdateBanner } from "@/components/common/UpdateBanner";
+import { OnboardingWizard } from "@/components/common/OnboardingWizard";
 import { toggleTheme } from "@/lib/theme";
+import { getAppState, patchAppState } from "@/lib/appState";
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/": {
@@ -71,6 +73,21 @@ export function AppShell() {
     PAGE_META[location.pathname] ??
     (prefixMeta ? PAGE_META[prefixMeta] : { title: "TrendForge AI", subtitle: "" });
 
+  // Restore the last visited route once, on first launch.
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current) return;
+    restored.current = true;
+    const last = getAppState().lastRoute;
+    if (last && last !== "/" && location.pathname === "/") navigate(last);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist the current route for next launch.
+  useEffect(() => {
+    patchAppState({ lastRoute: location.pathname });
+  }, [location.pathname]);
+
   // Keyboard shortcuts: 1-5 jump between modules.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -111,6 +128,7 @@ export function AppShell() {
           </div>
           <AnalysisPanel />
           <JobMonitor />
+          <OnboardingWizard />
           <DeveloperPanel open={devOpen} onClose={() => setDevOpen(false)} />
           <CommandPalette
             open={paletteOpen}

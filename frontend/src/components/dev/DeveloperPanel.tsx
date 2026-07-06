@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { RefreshCw, X, Database, Layers, HardDrive, FileCode } from "lucide-react";
-import { devApi, type DevStats } from "@/lib/api";
+import { devApi, systemApi, type DevStats, type Diagnostics } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex gap-3">
+      <span className="w-24 shrink-0 text-[var(--muted-foreground)]">{k}</span>
+      <span className="min-w-0 flex-1 break-all font-mono">{v}</span>
+    </div>
+  );
+}
 
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
@@ -15,14 +24,16 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 
 export function DeveloperPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [stats, setStats] = useState<DevStats | null>(null);
+  const [diag, setDiag] = useState<Diagnostics | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [tab, setTab] = useState<"stats" | "logs" | "prompts">("stats");
 
   const load = useCallback(async () => {
     try {
-      const [s, l] = await Promise.all([devApi.stats(), devApi.logs(150)]);
+      const [s, l, d] = await Promise.all([devApi.stats(), devApi.logs(150), systemApi.diagnostics()]);
       setStats(s);
       setLogs(l.lines);
+      setDiag(d);
     } catch {
       /* offline */
     }
@@ -88,6 +99,20 @@ export function DeveloperPanel({ open, onClose }: { open: boolean; onClose: () =
                 <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
               ) : tab === "stats" ? (
                 <div className="space-y-5">
+                  {diag && (
+                    <section>
+                      <h3 className="mb-2 text-sm font-semibold">System</h3>
+                      <div className="space-y-1.5 rounded-lg border border-[var(--border)] p-3 text-xs">
+                        <Row k="Version" v={diag.version} />
+                        <Row k="Backend port" v={String(diag.backend_port)} />
+                        <Row k="AI provider" v={`${diag.ai_provider.provider} ${diag.ai_provider.configured ? "· configured" : "· not configured"}`} />
+                        <Row k="Running jobs" v={String(diag.running_jobs)} />
+                        <Row k="Workspace" v={diag.workspace.workspace} />
+                        <Row k="Database" v={diag.database_path} />
+                        <Row k="Logs" v={diag.log_dir} />
+                      </div>
+                    </section>
+                  )}
                   <section>
                     <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
                       <Layers className="h-4 w-4" /> Queue

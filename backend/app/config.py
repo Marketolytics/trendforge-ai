@@ -8,13 +8,32 @@ via ``SettingsService`` and seeded from these defaults on first launch.
 
 from __future__ import annotations
 
+import os
+import sys
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Backend root directory (…/backend), i.e. the parent of the ``app`` package.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _default_data_dir() -> str:
+    """Resolve the workspace root.
+
+    - explicit ``TRENDFORGE_DATA_DIR`` env wins (used by the desktop launcher),
+    - a frozen/portable build stores data in the user's app-data directory,
+    - development uses ``backend/data``.
+    """
+    env = os.environ.get("TRENDFORGE_DATA_DIR")
+    if env:
+        return env
+    if getattr(sys, "frozen", False):  # PyInstaller / packaged sidecar
+        base = os.environ.get("LOCALAPPDATA") or str(Path.home())
+        return str(Path(base) / "TrendForgeAI")
+    return str(BASE_DIR / "data")
 
 
 class Settings(BaseSettings):
@@ -40,8 +59,8 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,tauri://localhost"
 
     # --- Filesystem layout ------------------------------------------------
-    # All local data lives under a single data directory by default.
-    data_dir: str = str(BASE_DIR / "data")
+    # The workspace root; all local data lives here.
+    data_dir: str = Field(default_factory=_default_data_dir)
     database_path: str = ""  # empty -> <data_dir>/trendforge.db
     log_dir: str = ""        # empty -> <data_dir>/logs
     output_folder: str = ""  # empty -> <data_dir>/exports
@@ -82,15 +101,47 @@ class Settings(BaseSettings):
         return Path(self.output_folder) if self.output_folder else self.data_path / "exports"
 
     @property
+    def resolved_projects_dir(self) -> Path:
+        return self.data_path / "projects"
+
+    @property
+    def resolved_cache_dir(self) -> Path:
+        return self.data_path / "cache"
+
+    @property
+    def resolved_backups_dir(self) -> Path:
+        return self.data_path / "backups"
+
+    @property
+    def resolved_settings_dir(self) -> Path:
+        return self.data_path / "settings"
+
+    @property
+    def resolved_temp_dir(self) -> Path:
+        return self.data_path / "temp"
+
+    @property
+    def workspace_dirs(self) -> dict[str, Path]:
+        return {
+            "workspace": self.data_path,
+            "projects": self.resolved_projects_dir,
+            "exports": self.resolved_output_folder,
+            "cache": self.resolved_cache_dir,
+            "logs": self.resolved_log_dir,
+            "backups": self.resolved_backups_dir,
+            "settings": self.resolved_settings_dir,
+            "temp": self.resolved_temp_dir,
+        }
+
+    @property
     def database_url(self) -> str:
         return f"sqlite:///{self.resolved_database_path.as_posix()}"
 
     def ensure_dirs(self) -> None:
-        """Create the local data directories if they don't exist."""
-        self.data_path.mkdir(parents=True, exist_ok=True)
+        """Create the full workspace directory tree (idempotent)."""
         self.resolved_database_path.parent.mkdir(parents=True, exist_ok=True)
-        self.resolved_log_dir.mkdir(parents=True, exist_ok=True)
-        self.resolved_output_folder.mkdir(parents=True, exist_ok=True)
+        for path in self.workspace_dirs.values():
+            path.mkdir(parents=True, exist_ok=True)
 
 
 @lru_cache

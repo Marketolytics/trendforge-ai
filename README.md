@@ -141,5 +141,16 @@ To enable AI: open **Settings** in the app and paste your Gemini API key
   **AI Provider** panel. The rest of the app no longer depends on Gemini-specific
   code.
 
+- **Sprint 10 — Desktop integration** — one-click app: the Tauri shell launches
+  the backend automatically as a bundled sidecar (auto port selection + duplicate
+  detection), the UI auto-discovers it (no manual URL) and shows a startup splash
+  with a friendly retry screen, the full workspace tree + database initialize on
+  first run, health-report and diagnostics endpoints back a system view in the
+  developer panel, an onboarding wizard appears when no AI provider is set, and
+  window/route/theme/last-trend state persist across launches. Includes a
+  PyInstaller backend spec + `scripts/build_release.ps1` for a portable Windows
+  build (backend runs cleanly on any local port via `run_server.py`).
+
 **TrendForge AI v1.0 is feature complete.** See `DEVELOPER.md` for architecture,
-adding collectors/agents/workflows/providers, and the release process.
+adding collectors/agents/workflows/providers, desktop integration, and the
+portable release process.

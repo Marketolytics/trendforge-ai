@@ -9,6 +9,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { api, ApiError, type Trend } from "@/lib/api";
+import { patchAppState } from "@/lib/appState";
 
 type Status = "idle" | "loading" | "refreshing" | "error";
 
@@ -33,7 +34,10 @@ export function TrendsProvider({ children }: { children: ReactNode }) {
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);
   const [selected, setSelected] = useState<Trend | null>(null);
 
-  const openTrend = useCallback((trend: Trend) => setSelected(trend), []);
+  const openTrend = useCallback((trend: Trend) => {
+    setSelected(trend);
+    patchAppState({ lastTrendId: trend.id });
+  }, []);
   const closeTrend = useCallback(() => setSelected(null), []);
 
   const loadTrends = useCallback(async () => {

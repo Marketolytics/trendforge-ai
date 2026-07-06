@@ -106,15 +106,42 @@ cd ..\frontend
 npm run build                              # type-check + production build
 ```
 
-## Creating a release
+## Desktop integration (one-click app)
 
-1. Bump the version in `backend/app/config.py`, `frontend/package.json`, `frontend/src-tauri/{tauri.conf.json,Cargo.toml}`.
-2. Install the Tauri prerequisites on Windows: Rust toolchain, Microsoft C++ Build Tools, WebView2.
-3. Generate icons: `cd frontend && npx tauri icon path/to/icon.png`.
-4. Build the desktop app + installer: `npm run tauri build`.
-   - Output: `frontend/src-tauri/target/release/bundle/` (`.msi` installer + `.exe`).
-5. The backend runs as a local sidecar; ensure Python and dependencies are available, or bundle it (see Tauri sidecar docs).
+The Tauri shell (`frontend/src-tauri/src/lib.rs`) is a backend process manager:
 
-> Note: producing the Windows `.exe`/installer requires the Rust toolchain, which
-> must be installed on the build machine. In development the UI runs in the
-> browser via Vite and the backend via uvicorn.
+- picks a local port (reusing an already-running instance to avoid duplicates),
+- launches the bundled backend **sidecar** with `--port`,
+- exposes the URL to the UI via the `get_backend_url` command (frontend
+  auto-discovers it in `lib/backend.ts` — no manual URL),
+- monitors the backend and restarts it if it crashes,
+- kills it cleanly on exit.
+
+On startup the UI shows a splash until `/api/health` responds (`StartupGate`),
+with a friendly retry screen if the backend can't be reached. The workspace
+folders and database are created automatically on first run; window size/
+position persist via `tauri-plugin-window-state`, and route/theme/last-trend
+via `localStorage`.
+
+## Creating a portable release
+
+Prereqs on the build machine: Python 3.12+ (backend deps + `pyinstaller`),
+Node 20+, Rust toolchain + Microsoft C++ Build Tools + WebView2.
+
+1. Bump the version in `backend/app/config.py`, `frontend/package.json`,
+   `frontend/src-tauri/{tauri.conf.json,Cargo.toml}`.
+2. Generate icons once: `cd frontend && npx tauri icon path/to/icon.png`.
+3. Run the release script from the repo root:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\build_release.ps1
+   ```
+   It builds the backend into a single exe (`backend/trendforge-backend.spec`),
+   copies it into `frontend/src-tauri/binaries/trendforge-backend-<triple>.exe`
+   as the Tauri sidecar, then runs `npm run tauri build`.
+4. Output: `frontend/src-tauri/target/release/bundle/` (NSIS/MSI installer +
+   the portable `.exe`). No Python runtime is required on the end-user machine —
+   the backend is bundled as the sidecar.
+
+> The final Windows `.exe`/installer requires the Rust toolchain on the build
+> machine. In development the UI runs via Vite and the backend via
+> `python run_server.py` — the same entrypoint the packaged sidecar uses.

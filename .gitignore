@@ -27,6 +27,12 @@ dist-ssr/
 target/
 Cargo.lock
 
+# Build artifacts
+build/
+*.tsbuildinfo
+frontend/src-tauri/binaries/
+frontend/src-tauri/gen/
+
 # Editor / OS
 .DS_Store
 .idea/
