@@ -47,9 +47,7 @@
       "nsis": {
         "installMode": "both",
         "displayLanguageSelector": false,
-        "installerHooks": "installer/hooks.nsh",
-        "installerIcon": "icons/icon.ico",
-        "shortcutName": "TrendForge AI"
+        "installerHooks": "installer/hooks.nsh"
       }
     }
   }

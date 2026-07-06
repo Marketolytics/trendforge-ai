@@ -58,18 +58,22 @@ Pop-Location
 Write-Host "==> 3/4  Collecting artifacts"
 $releaseDir = "$root\dist\release\v$version"
 New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
-$bundle = "$root\frontend\src-tauri\target\release\bundle"
-$portableExe = "$root\frontend\src-tauri\target\release\TrendForge AI.exe"
+$rawDir = "$root\frontend\src-tauri\target\release"
+$bundle = "$rawDir\bundle"
+# Tauri names the binary from the Cargo package (trendforge-ai.exe); the backend
+# sidecar sits beside it without the target-triple suffix at runtime.
+$portableExe = "$rawDir\trendforge-ai.exe"
+$portableSidecar = "$rawDir\trendforge-backend.exe"
 
 Get-ChildItem -Path "$bundle\nsis\*.exe", "$bundle\msi\*.msi" -ErrorAction SilentlyContinue |
     ForEach-Object { Copy-Item $_.FullName $releaseDir -Force }
 
-# Portable ZIP: raw exe + sidecar + README.
+# Portable ZIP: app exe + embedded backend + install guide.
 if (Test-Path $portableExe) {
     $portableStage = "$releaseDir\portable"
     New-Item -ItemType Directory -Force -Path $portableStage | Out-Null
-    Copy-Item $portableExe $portableStage -Force
-    Copy-Item "$binDir\trendforge-backend-$triple.exe" $portableStage -Force
+    Copy-Item $portableExe "$portableStage\TrendForge AI.exe" -Force
+    if (Test-Path $portableSidecar) { Copy-Item $portableSidecar $portableStage -Force }
     Copy-Item "$root\docs\INSTALL.md" $portableStage -Force -ErrorAction SilentlyContinue
     Compress-Archive -Path "$portableStage\*" -DestinationPath "$releaseDir\TrendForge-AI-$version-portable.zip" -Force
     Remove-Item $portableStage -Recurse -Force
