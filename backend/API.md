@@ -61,6 +61,30 @@ Recent refresh runs: counts, duration, status, per-run detail.
 - `POST /api/cache/clear?namespace=` — clear all or one namespace; returns `{ cleared }`
 - `POST /api/cache/clear-expired` — drop expired entries only
 
-## Content (placeholder — Sprint 3+)
+## AI Intelligence (Sprint 3)
+
+Every AI endpoint returns a standard envelope:
+```json
+{ "kind": "analysis", "trend_id": 12, "prompt_version": "1.0.0",
+  "cached": false, "generated_at": "...", "data": { ... } }
+```
+Results are persisted to `generated_content` (one row per trend+kind) so repeat
+requests are free. Pass `?force=true` to regenerate. Requires a Gemini API key
+(set via `PUT /api/settings`), otherwise endpoints return **409**.
+
+- `GET  /api/ai/status` — `{ configured, model }`
+- `GET  /api/ai/prompts` — versioned prompt templates in the library
+- `POST /api/ai/analyze/{trend_id}` — intelligence, timeline, audience, opportunity score, content gap
+- `POST /api/ai/summary/{trend_id}` — short/detailed/creator summary + facts, cautions, misinfo, sources
+- `POST /api/ai/opportunity/{trend_id}` — opportunity score + 9 factors + explanation
+- `POST /api/ai/strategy/{trend_id}` — 10 shorts, 5 long, 5 community, 5 X, 3 carousels, 3 livestreams
+- `POST /api/ai/hooks/{trend_id}` — 25+ ranked hooks across 7 types
+- `POST /api/ai/titles/{trend_id}` — title variants + predicted CTR
+- `POST /api/ai/thumbnail/{trend_id}` — thumbnail creative direction (no image generation)
+
+Prompts live in `app/services/ai/prompt_library/*.md` — versioned and editable
+without code changes (hot-reloaded on file change).
+
+## Content (placeholder — Sprint 4+)
 
 - `GET /api/content/status`

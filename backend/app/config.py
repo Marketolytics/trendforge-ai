@@ -48,6 +48,7 @@ class Settings(BaseSettings):
 
     # --- User-editable defaults (persisted to DB on first launch) ---------
     gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.5-flash"
     refresh_interval: int = 3600   # seconds between auto refreshes
     cache_duration: int = 1800     # seconds a cached request stays fresh
     theme: str = "dark"

@@ -73,5 +73,16 @@ npm run tauri dev
   (dedupe + cluster + preliminary scoring), documented API, and a live
   dashboard. See `backend/API.md` for the API reference.
 
+- **Sprint 3** — AI intelligence engine: a modular AI service layer (versioned
+  markdown prompt library, Gemini client with retries + logging, robust JSON
+  parsing) that turns each trend into an actionable content opportunity —
+  intelligence, timeline, audience, a 0-100 opportunity score, content-gap
+  analysis, ranked hooks/titles/strategy, and thumbnail direction. Results are
+  persisted and regenerable. A slide-over analysis panel surfaces it all in the
+  UI, and Settings lets you add your Gemini key.
+
 The backend stores data under `backend/data/` (SQLite DB, logs, exports).
 The default backend port is **8756**.
+
+To enable AI: open **Settings** in the app and paste your Gemini API key
+(or set `TRENDFORGE_GEMINI_API_KEY` in `backend/.env`).

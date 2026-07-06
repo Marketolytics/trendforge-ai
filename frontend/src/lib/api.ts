@@ -83,6 +83,138 @@ export interface AppSettings {
   log_level: string;
   gemini_api_key: string;
   gemini_api_key_set: boolean;
+  gemini_model: string;
+}
+
+// --- AI types -------------------------------------------------------------
+
+export interface AiEnvelope<T> {
+  kind: string;
+  trend_id: number;
+  prompt_version: string;
+  cached: boolean;
+  generated_at: string;
+  data: T;
+}
+
+export interface AiStatus {
+  configured: boolean;
+  model: string;
+}
+
+export interface RelevanceHorizon {
+  horizon: string;
+  level: "high" | "medium" | "low" | string;
+  note: string;
+}
+
+export interface FormatRecommendation {
+  format: string;
+  recommended: boolean;
+  confidence: number;
+  reason: string;
+}
+
+export interface OpportunityFactors {
+  freshness: number;
+  search_interest: number;
+  competition: number;
+  viewer_curiosity: number;
+  shareability: number;
+  emotional_impact: number;
+  replay_potential: number;
+  monetization_potential: number;
+  evergreen_value: number;
+}
+
+export interface Opportunity {
+  score: number;
+  factors: OpportunityFactors;
+  explanation: string;
+}
+
+export interface UniqueIdea {
+  idea: string;
+  angle: string;
+  why: string;
+}
+
+export interface TrendAnalysis {
+  intelligence: {
+    what_happened: string;
+    why_important: string;
+    who_cares: string;
+    is_growing: boolean;
+    growth_reason: string;
+  };
+  relevance: RelevanceHorizon[];
+  timeline: { stage: string; confidence: number; explanation: string };
+  audience: {
+    age_range: string;
+    gaming_knowledge: string;
+    intensity: string;
+    region: string;
+    search_intent: string;
+    expected_emotion: string;
+    presentation_style: string;
+  };
+  formats: FormatRecommendation[];
+  opportunity: Opportunity;
+  content_gap: {
+    common_angles: string[];
+    saturated_angles: string[];
+    undercovered_angles: string[];
+    unique_ideas: UniqueIdea[];
+  };
+}
+
+export interface TrendSummary {
+  short: string;
+  detailed: string;
+  creator: string;
+  key_facts: string[];
+  things_to_avoid: string[];
+  potential_misinformation: string[];
+  verified_sources: string[];
+}
+
+export interface Hook {
+  text: string;
+  type: string;
+  click_potential: number;
+}
+export interface HooksData {
+  hooks: Hook[];
+}
+
+export interface TitleItem {
+  text: string;
+  type: string;
+  predicted_ctr: number;
+}
+export interface TitlesData {
+  titles: TitleItem[];
+}
+
+export interface ThumbnailStrategy {
+  concept: string;
+  text: string;
+  emotion: string;
+  composition: string;
+  background: string;
+  subject_placement: string;
+  color_direction: string;
+  visual_hierarchy: string;
+  alternates: { concept: string; text: string }[];
+}
+
+export interface ContentStrategy {
+  shorts: { idea: string; hook_angle: string; rank: number }[];
+  long_videos: { idea: string; angle: string; rank: number }[];
+  community_posts: { text: string; rank: number }[];
+  x_posts: { text: string; rank: number }[];
+  instagram_carousels: { concept: string; slides: string[]; rank: number }[];
+  livestreams: { concept: string; rank: number }[];
 }
 
 // --- Error + request helper ----------------------------------------------
@@ -147,5 +279,31 @@ export const api = {
 
   getSettings: () => request<AppSettings>("/api/settings"),
 
+  updateSettings: (values: Partial<AppSettings>) =>
+    request<AppSettings>("/api/settings", {
+      method: "PUT",
+      body: JSON.stringify(values),
+    }),
+
   clearCache: () => request<{ cleared: number }>("/api/cache/clear", { method: "POST" }),
+};
+
+// --- AI API ---------------------------------------------------------------
+
+function aiPost<T>(kind: string, trendId: number, force: boolean) {
+  return request<AiEnvelope<T>>(
+    `/api/ai/${kind}/${trendId}${query({ force: force ? "true" : undefined })}`,
+    { method: "POST" },
+  );
+}
+
+export const aiApi = {
+  status: () => request<AiStatus>("/api/ai/status"),
+  analyze: (id: number, force = false) => aiPost<TrendAnalysis>("analyze", id, force),
+  summary: (id: number, force = false) => aiPost<TrendSummary>("summary", id, force),
+  opportunity: (id: number, force = false) => aiPost<Opportunity>("opportunity", id, force),
+  strategy: (id: number, force = false) => aiPost<ContentStrategy>("strategy", id, force),
+  hooks: (id: number, force = false) => aiPost<HooksData>("hooks", id, force),
+  titles: (id: number, force = false) => aiPost<TitlesData>("titles", id, force),
+  thumbnail: (id: number, force = false) => aiPost<ThumbnailStrategy>("thumbnail", id, force),
 };

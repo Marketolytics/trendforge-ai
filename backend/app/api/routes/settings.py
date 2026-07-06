@@ -14,6 +14,7 @@ router = APIRouter(prefix="/settings", tags=["settings"])
 
 class SettingsUpdate(BaseModel):
     gemini_api_key: str | None = None
+    gemini_model: str | None = None
     refresh_interval: int | None = None
     cache_duration: int | None = None
     theme: str | None = None

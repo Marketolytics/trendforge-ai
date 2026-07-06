@@ -5,6 +5,7 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { NAV_ITEMS } from "./navigation";
 import { TrendsProvider } from "@/store/trends";
+import { AnalysisPanel } from "@/components/trends/analysis/AnalysisPanel";
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/": {
@@ -67,6 +68,7 @@ export function AppShell() {
             </AnimatePresence>
           </main>
         </div>
+        <AnalysisPanel />
       </div>
     </TrendsProvider>
   );

@@ -18,6 +18,7 @@ from app.db.session import engine
 # Keys that are user-editable, with their default values (from env/config).
 EDITABLE_DEFAULTS: dict[str, str] = {
     "gemini_api_key": env_settings.gemini_api_key,
+    "gemini_model": env_settings.gemini_model,
     "refresh_interval": str(env_settings.refresh_interval),
     "cache_duration": str(env_settings.cache_duration),
     "theme": env_settings.theme,

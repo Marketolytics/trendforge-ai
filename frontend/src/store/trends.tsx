@@ -17,6 +17,9 @@ interface TrendsState {
   status: Status;
   error: string | null;
   lastRefresh: string | null;
+  selected: Trend | null;
+  openTrend: (trend: Trend) => void;
+  closeTrend: () => void;
   loadTrends: () => Promise<void>;
   refresh: (force?: boolean) => Promise<void>;
 }
@@ -28,6 +31,10 @@ export function TrendsProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Trend | null>(null);
+
+  const openTrend = useCallback((trend: Trend) => setSelected(trend), []);
+  const closeTrend = useCallback(() => setSelected(null), []);
 
   const loadTrends = useCallback(async () => {
     try {
@@ -79,8 +86,18 @@ export function TrendsProvider({ children }: { children: ReactNode }) {
   }, [loadTrends]);
 
   const value = useMemo(
-    () => ({ trends, status, error, lastRefresh, loadTrends, refresh }),
-    [trends, status, error, lastRefresh, loadTrends, refresh],
+    () => ({
+      trends,
+      status,
+      error,
+      lastRefresh,
+      selected,
+      openTrend,
+      closeTrend,
+      loadTrends,
+      refresh,
+    }),
+    [trends, status, error, lastRefresh, selected, openTrend, closeTrend, loadTrends, refresh],
   );
 
   return <TrendsContext.Provider value={value}>{children}</TrendsContext.Provider>;
