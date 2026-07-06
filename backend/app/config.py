@@ -20,19 +20,40 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def _is_writable(path: Path) -> bool:
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        probe = path / ".write_test"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink()
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def _default_data_dir() -> str:
-    """Resolve the workspace root.
+    """Resolve the workspace root, auto-detecting a writable location.
 
     - explicit ``TRENDFORGE_DATA_DIR`` env wins (used by the desktop launcher),
-    - a frozen/portable build stores data in the user's app-data directory,
+    - a packaged build stores user data in ``%LOCALAPPDATA%\\TrendForge AI``
+      (so upgrades never touch it), falling back to the home directory or a
+      portable folder beside the executable if that isn't writable,
     - development uses ``backend/data``.
     """
     env = os.environ.get("TRENDFORGE_DATA_DIR")
     if env:
         return env
     if getattr(sys, "frozen", False):  # PyInstaller / packaged sidecar
-        base = os.environ.get("LOCALAPPDATA") or str(Path.home())
-        return str(Path(base) / "TrendForgeAI")
+        candidates: list[Path] = []
+        local = os.environ.get("LOCALAPPDATA")
+        if local:
+            candidates.append(Path(local) / "TrendForge AI")
+        candidates.append(Path.home() / "TrendForge AI")
+        candidates.append(Path(sys.executable).resolve().parent / "TrendForge-Data")
+        for candidate in candidates:
+            if _is_writable(candidate):
+                return str(candidate)
+        return str(Path.home() / "TrendForge AI")
     return str(BASE_DIR / "data")
 
 

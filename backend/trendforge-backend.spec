@@ -4,9 +4,13 @@
 # Build:  pyinstaller trendforge-backend.spec --noconfirm
 # Output: dist/trendforge-backend(.exe)
 
+import os
+
 from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 datas = [("app/services/ai/prompt_library", "app/services/ai/prompt_library")]
+if os.path.exists("build_info.json"):
+    datas.append(("build_info.json", "."))
 binaries = []
 hiddenimports = []
 

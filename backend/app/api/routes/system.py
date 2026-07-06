@@ -107,7 +107,9 @@ def _newer(latest: str, current: str) -> bool:
 
 @router.get("/version")
 def version() -> dict:
-    return {"name": settings.app_name, "version": settings.version}
+    from app.build_info import build_info
+
+    return build_info()
 
 
 @router.post("/update-check")

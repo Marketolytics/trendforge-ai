@@ -31,11 +31,26 @@
     "active": true,
     "targets": ["nsis", "msi"],
     "externalBin": ["binaries/trendforge-backend"],
+    "publisher": "TrendForge",
+    "copyright": "© 2026 TrendForge",
+    "category": "Productivity",
+    "shortDescription": "AI content intelligence desktop app",
+    "longDescription": "TrendForge AI collects trending topics, researches them across sources, and generates production-ready content packages — locally on your machine.",
+    "licenseFile": "installer/license.txt",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "both",
+        "displayLanguageSelector": false,
+        "installerHooks": "installer/hooks.nsh",
+        "installerIcon": "icons/icon.ico",
+        "shortcutName": "TrendForge AI"
+      }
+    }
   }
 }

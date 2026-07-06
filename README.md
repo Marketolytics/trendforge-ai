@@ -151,6 +151,16 @@ To enable AI: open **Settings** in the app and paste your Gemini API key
   PyInstaller backend spec + `scripts/build_release.ps1` for a portable Windows
   build (backend runs cleanly on any local port via `run_server.py`).
 
+- **Sprint 11 — Windows installer & distribution** — packaging only: Tauri NSIS/MSI
+  installer config (install dir choice, desktop + Start Menu shortcuts, license
+  screen, uninstaller with an opt-in "remove user data" prompt), embedded Python
+  backend via PyInstaller (no Python needed by users), user data isolated in
+  `%LOCALAPPDATA%\TrendForge AI` so upgrades preserve everything, build/version
+  metadata (`/api/version` reports version + build date + commit + channel),
+  `scripts/build_release.ps1` (installer + portable ZIP + SHA-256 checksums),
+  `scripts/validate_release.ps1`, and distribution docs in `docs/`
+  (install / upgrade / troubleshooting / known issues).
+
 **TrendForge AI v1.0 is feature complete.** See `DEVELOPER.md` for architecture,
 adding collectors/agents/workflows/providers, desktop integration, and the
-portable release process.
+portable release + installer process.

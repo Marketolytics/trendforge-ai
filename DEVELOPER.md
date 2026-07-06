@@ -138,9 +138,16 @@ Node 20+, Rust toolchain + Microsoft C++ Build Tools + WebView2.
    It builds the backend into a single exe (`backend/trendforge-backend.spec`),
    copies it into `frontend/src-tauri/binaries/trendforge-backend-<triple>.exe`
    as the Tauri sidecar, then runs `npm run tauri build`.
-4. Output: `frontend/src-tauri/target/release/bundle/` (NSIS/MSI installer +
-   the portable `.exe`). No Python runtime is required on the end-user machine —
-   the backend is bundled as the sidecar.
+4. Output: `dist/release/v<version>/` — the NSIS/MSI installer, the portable
+   ZIP, and `SHA256SUMS.txt`. No Python runtime is required on the end-user
+   machine — the backend is bundled as the sidecar.
+5. Validate the build: `powershell -File scripts\validate_release.ps1` (launches
+   the embedded backend, checks DB init + workspace + artifacts).
+
+Distribution docs live in `docs/`: `INSTALL.md`, `UPGRADE.md`,
+`TROUBLESHOOTING.md`, `KNOWN_ISSUES.md`. The installer configuration is in
+`frontend/src-tauri/tauri.conf.json` (`bundle.windows.nsis`) with an uninstall
+data-prompt hook at `src-tauri/installer/hooks.nsh`.
 
 > The final Windows `.exe`/installer requires the Rust toolchain on the build
 > machine. In development the UI runs via Vite and the backend via

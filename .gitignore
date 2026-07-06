@@ -32,6 +32,7 @@ build/
 *.tsbuildinfo
 frontend/src-tauri/binaries/
 frontend/src-tauri/gen/
+backend/build_info.json
 
 # Editor / OS
 .DS_Store
