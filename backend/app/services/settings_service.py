@@ -17,8 +17,12 @@ from app.db.session import engine
 
 # Keys that are user-editable, with their default values (from env/config).
 EDITABLE_DEFAULTS: dict[str, str] = {
-    "gemini_api_key": env_settings.gemini_api_key,
+    # API keys are NOT stored here — they live in the OS credential store.
     "gemini_model": env_settings.gemini_model,
+    "provider": "gemini",
+    "model_research": env_settings.gemini_model,
+    "model_content": env_settings.gemini_model,
+    "model_quality": env_settings.gemini_model,
     "refresh_interval": str(env_settings.refresh_interval),
     "cache_duration": str(env_settings.cache_duration),
     "theme": env_settings.theme,
@@ -32,8 +36,8 @@ EDITABLE_DEFAULTS: dict[str, str] = {
     "update_url": env_settings.update_url,
 }
 
-# Keys whose value should never be returned in plaintext by the API.
-SECRET_KEYS = {"gemini_api_key"}
+# API keys are stored in the OS credential store, never here.
+SECRET_KEYS: set[str] = set()
 
 BOOL_KEYS = {"notifications", "developer_mode", "experimental", "auto_backup"}
 
@@ -124,16 +128,16 @@ class SettingsService:
     @staticmethod
     def all(mask_secrets: bool = True) -> dict[str, Any]:
         """Return all editable settings, merging DB values over defaults."""
+        from app.services.ai import credentials
+
         result: dict[str, Any] = dict(EDITABLE_DEFAULTS)
         with Session(engine) as session:
             for row in session.exec(select(Setting)).all():
-                result[row.key] = row.value
+                if row.key in EDITABLE_DEFAULTS:
+                    result[row.key] = row.value
 
-        if mask_secrets:
-            for key in SECRET_KEYS:
-                value = result.get(key) or ""
-                result[key] = "" if not value else "••••••••"
-                result[f"{key}_set"] = bool(value)
+        # Secrets live in the OS credential store — expose only "is it set?".
+        result["gemini_api_key_set"] = credentials.has_key("gemini")
 
         # Coerce known numeric fields for a clean API contract.
         for numeric in ("refresh_interval", "cache_duration"):

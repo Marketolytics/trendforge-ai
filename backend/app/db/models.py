@@ -156,6 +156,18 @@ class CompetitorVideo(SQLModel, table=True):
     collected_at: datetime = Field(default_factory=utcnow)
 
 
+class ProviderUsage(SQLModel, table=True):
+    """Local usage counters per AI provider."""
+
+    __tablename__ = "provider_usage"
+
+    provider: str = Field(primary_key=True)
+    requests: int = Field(default=0)
+    prompt_tokens: int = Field(default=0)
+    response_tokens: int = Field(default=0)
+    last_success: datetime | None = Field(default=None)
+
+
 class Favorite(SQLModel, table=True):
     """A user-saved item (trend, script, prompt, hook, thumbnail, seo, ...)."""
 

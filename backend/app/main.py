@@ -27,6 +27,27 @@ async def lifespan(app: FastAPI):
     SettingsService.seed_defaults()
     seed_sources()
 
+    # Migrate any legacy plaintext Gemini key into the OS credential store.
+    try:
+        from sqlmodel import Session
+
+        from app.db.models import Setting
+        from app.db.session import engine as _engine
+        from app.services.ai import credentials as _cred
+
+        with Session(_engine) as _s:
+            legacy = _s.get(Setting, "gemini_api_key")
+            if legacy and legacy.value:
+                _cred.set_key("gemini", legacy.value)
+                _s.delete(legacy)
+                _s.commit()
+                get_logger("trendforge").info(
+                    "migrated legacy API key to credential store",
+                    extra={"category": "general"},
+                )
+    except Exception:  # noqa: BLE001
+        pass
+
     # Start the orchestrator worker and resume any interrupted jobs.
     from app.services.orchestrator import engine as orchestrator
 

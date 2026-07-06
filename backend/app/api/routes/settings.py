@@ -41,12 +41,19 @@ def get_settings() -> dict[str, Any]:
 
 @router.put("")
 def update_settings(payload: SettingsUpdate) -> dict[str, Any]:
-    """Validate and persist one or more editable settings."""
-    raw = {
-        key: value
-        for key, value in payload.model_dump(exclude_unset=True).items()
-        if key in EDITABLE_DEFAULTS
-    }
+    """Validate and persist one or more editable settings.
+
+    The Gemini API key is routed to the OS credential store, never the DB.
+    """
+    data = payload.model_dump(exclude_unset=True)
+
+    api_key = data.pop("gemini_api_key", None)
+    if api_key:
+        from app.services.ai import credentials
+
+        credentials.set_key("gemini", api_key.strip())
+
+    raw = {key: value for key, value in data.items() if key in EDITABLE_DEFAULTS}
     try:
         values = validate_settings(raw)
     except SettingValidationError as exc:

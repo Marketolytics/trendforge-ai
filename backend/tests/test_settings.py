@@ -33,8 +33,8 @@ def test_validate_rejects_bad_theme():
         validate_settings({"theme": "rainbow"})
 
 
-def test_secrets_masked():
-    SettingsService.set("gemini_api_key", "secret123")
-    data = SettingsService.all(mask_secrets=True)
-    assert data["gemini_api_key"] != "secret123"
-    assert data["gemini_api_key_set"] is True
+def test_settings_excludes_plaintext_key():
+    # API keys live in the OS credential store, never in the settings payload.
+    data = SettingsService.all()
+    assert "gemini_api_key" not in data
+    assert "gemini_api_key_set" in data

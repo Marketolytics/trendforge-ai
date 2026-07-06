@@ -173,6 +173,24 @@ The base package includes: `members` (clustered story items), `sources` (with
 confidence tiers), `timeline`, `keywords`, `entities`, `related_stories`,
 `graph` and an overall `research_confidence`.
 
+## AI Providers & Model Management (Sprint 9)
+
+TrendForge talks to AI through a provider interface, so it never depends on a
+single vendor. API keys are stored in the **OS credential store** (never SQLite
+or plaintext). Tasks route to per-category models (research / content / quality).
+
+- `GET    /api/providers` — providers with `requires_key`, `key_set`, `configured`, `active`
+- `GET    /api/providers/config` — active provider + per-category models
+- `PUT    /api/providers/config` — set `{ provider, model_research, model_content, model_quality }`
+- `POST   /api/providers/{name}/key` — store an API key securely `{ key }`
+- `DELETE /api/providers/{name}/key` — reset credentials
+- `POST   /api/providers/{name}/test` — validate: `{ ok, latency_ms, models, error }`
+- `GET    /api/providers/usage` — local request counts + token estimates per provider
+
+Built-in providers: `gemini` (Google Gemini), plus OpenAI-compatible `openai`,
+`openrouter`, `ollama` and `lmstudio`. Adding a provider is a one-line registry
+entry (`services/ai/providers/registry.py`).
+
 ## Content (placeholder)
 
 - `GET /api/content/status`

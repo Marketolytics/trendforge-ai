@@ -132,5 +132,14 @@ The default backend port is **8756**.
 To enable AI: open **Settings** in the app and paste your Gemini API key
 (or set `TRENDFORGE_GEMINI_API_KEY` in `backend/.env`).
 
+- **Sprint 9** — AI Provider & Model Management: a vendor-agnostic provider
+  interface (`connect/validate/list_models/generate/stream`) with Gemini plus
+  OpenAI-compatible providers (OpenAI, OpenRouter, Ollama, LM Studio); API keys
+  stored in the **OS credential store** (never in SQLite/plaintext); connection
+  testing (latency, models, errors); per-task **model routing**
+  (research / content / quality); and a usage dashboard — all in a new Settings
+  **AI Provider** panel. The rest of the app no longer depends on Gemini-specific
+  code.
+
 **TrendForge AI v1.0 is feature complete.** See `DEVELOPER.md` for architecture,
-adding collectors/agents/workflows, and the release process.
+adding collectors/agents/workflows/providers, and the release process.

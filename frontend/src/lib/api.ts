@@ -958,3 +958,56 @@ export const backupApi = {
       body: JSON.stringify(bundle),
     }),
 };
+
+// --- Sprint 9: AI providers ----------------------------------------------
+
+export interface ProviderInfo {
+  name: string;
+  label: string;
+  requires_key: boolean;
+  base_url: string;
+  default_models: string[];
+  key_set: boolean;
+  configured: boolean;
+  active: boolean;
+}
+
+export interface ProviderConfig {
+  provider: string;
+  models: { research: string; content: string; quality: string };
+}
+
+export interface ConnectionTest {
+  ok: boolean;
+  latency_ms: number;
+  models: { id: string; label: string }[];
+  error: string | null;
+}
+
+export interface ProviderUsageRow {
+  provider: string;
+  requests: number;
+  prompt_tokens: number;
+  response_tokens: number;
+  total_tokens: number;
+  last_success: string | null;
+}
+
+export const providersApi = {
+  list: () => request<{ active: string; providers: ProviderInfo[] }>("/api/providers"),
+  getConfig: () => request<ProviderConfig>("/api/providers/config"),
+  setConfig: (cfg: Partial<{ provider: string; model_research: string; model_content: string; model_quality: string }>) =>
+    request<ProviderConfig>("/api/providers/config", { method: "PUT", body: JSON.stringify(cfg) }),
+  setKey: (name: string, key: string) =>
+    request<{ ok: boolean; key_set: boolean }>(`/api/providers/${name}/key`, {
+      method: "POST",
+      body: JSON.stringify({ key }),
+    }),
+  deleteKey: (name: string) =>
+    request<{ ok: boolean; key_set: boolean }>(`/api/providers/${name}/key`, { method: "DELETE" }),
+  test: (name: string) => request<ConnectionTest>(`/api/providers/${name}/test`, { method: "POST" }),
+  usage: () =>
+    request<{ active_provider: string; models: Record<string, string>; usage: ProviderUsageRow[] }>(
+      "/api/providers/usage",
+    ),
+};

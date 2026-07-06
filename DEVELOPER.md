@@ -63,6 +63,16 @@ No other code changes needed — the aggregation engine dispatches by source typ
 4. Expose an endpoint in `api/routes/ai.py`.
 5. (Optional) register a `GeneratorAgent` in `orchestrator/agents.py` to use it in workflows.
 
+## How to add a new AI provider
+
+1. Implement `AIProvider` in `services/ai/providers/` (or reuse
+   `OpenAICompatibleProvider` for any OpenAI-style endpoint): `validate`,
+   `list_models`, `generate`, optional `stream`.
+2. Register it in `services/ai/providers/registry.py` (`PROVIDERS`).
+3. That's it — the model router, service facade, settings UI and usage tracking
+   pick it up automatically. Keys go to the OS credential store via
+   `services/ai/credentials.py`; never store them in the DB or config.
+
 ## How to add a new workflow
 
 Add an entry to `WORKFLOWS` in `services/orchestrator/workflows.py`:
