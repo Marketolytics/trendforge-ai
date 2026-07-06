@@ -693,3 +693,96 @@ export const insightApi = {
   multiIdeas: (id: number, force = false) =>
     request<AiEnvelope<MultiIdeas>>(`/api/ai/multi-ideas/${id}${query({ force: force ? "true" : undefined })}`, { method: "POST" }),
 };
+
+// --- Sprint 6: Orchestrator & developer types ----------------------------
+
+export interface WorkflowTemplate {
+  name: string;
+  label: string;
+  description: string;
+  default_format: string | null;
+  agents: string[];
+}
+
+export interface JobStep {
+  key: string;
+  label: string;
+  status: "pending" | "running" | "done" | "failed" | "skipped" | string;
+  attempts: number;
+  duration_ms: number;
+  error: string | null;
+}
+
+export interface Job {
+  id: string;
+  workflow: string;
+  trend_id: number | null;
+  variant: string;
+  status: "queued" | "running" | "paused" | "completed" | "failed" | "cancelled" | string;
+  progress: number;
+  current_step: string;
+  steps: JobStep[];
+  result: Record<string, unknown>;
+  error: string | null;
+  eta_seconds: number | null;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+}
+
+export interface JobCreate {
+  workflow: string;
+  trend_id: number;
+  format?: string;
+  voice_style?: string;
+  force?: boolean;
+  priority?: number;
+}
+
+export interface DevStats {
+  cache: { total: number; fresh: number; expired: number };
+  queue: { queue_size: number; worker_running: boolean; by_status: Record<string, number>; total: number };
+  db: Record<string, number>;
+  prompts: { name: string; version: string; description: string }[];
+  model: string;
+}
+
+const ACTIVE_JOB_STATES = ["queued", "running", "paused"];
+export function isActiveJob(job: Job): boolean {
+  return ACTIVE_JOB_STATES.includes(job.status);
+}
+
+export const orchestratorApi = {
+  workflows: () => request<WorkflowTemplate[]>("/api/workflows"),
+  createJob: (payload: JobCreate) =>
+    request<Job>("/api/jobs", { method: "POST", body: JSON.stringify(payload) }),
+  listJobs: (status?: string, limit = 30) =>
+    request<Job[]>(`/api/jobs${query({ status, limit })}`),
+  getJob: (id: string) => request<Job>(`/api/jobs/${id}`),
+  cancel: (id: string) => request<{ ok: boolean }>(`/api/jobs/${id}/cancel`, { method: "POST" }),
+  pause: (id: string) => request<{ ok: boolean }>(`/api/jobs/${id}/pause`, { method: "POST" }),
+  resume: (id: string) => request<{ ok: boolean }>(`/api/jobs/${id}/resume`, { method: "POST" }),
+  retry: (id: string) => request<{ ok: boolean }>(`/api/jobs/${id}/retry`, { method: "POST" }),
+};
+
+export const devApi = {
+  stats: () => request<DevStats>("/api/dev/stats"),
+  logs: (lines = 120) => request<{ lines: string[] }>(`/api/dev/logs${query({ lines })}`),
+  prompt: (name: string) =>
+    request<{ name: string; version: string; description: string; temperature: number; variables: string[]; body: string }>(
+      `/api/dev/prompts/${name}`,
+    ),
+  previewPrompt: (name: string, trendId: number, format = "60s") =>
+    request<{ valid: boolean; missing: string[]; variables: string[]; rendered: string }>(
+      `/api/dev/prompts/${name}/preview${query({ trend_id: trendId, format })}`,
+      { method: "POST" },
+    ),
+  generations: (params: { trend_id?: number; kind?: string; limit?: number } = {}) =>
+    request<
+      { id: number; trend_id: number | null; kind: string; variant: string; prompt_version: string; prompt_chars: number; response_chars: number; duration_ms: number; created_at: string }[]
+    >(`/api/dev/generations${query(params)}`),
+  generation: (id: number) =>
+    request<{ id: number; kind: string; prompt_text: string; response: Record<string, unknown> }>(
+      `/api/dev/generations/${id}`,
+    ),
+};

@@ -135,6 +135,28 @@ Intelligence AI generators (trend-scoped, `?force=true` to regenerate):
 - `POST /api/ai/competitor-gap/{id}` — what competitors aren't covering, ranked
 - `POST /api/ai/multi-ideas/{id}` — full idea slate with duplicate protection
 
+## Orchestrator & Background Jobs (Sprint 6)
+
+Workflows are ordered groups of agents (parallel within a group, sequential
+across groups). Jobs run on a persistent background queue (single worker; jobs
+survive restart and resume from cache). Each stage retries on failure.
+
+- `GET  /api/workflows` — workflow templates (complete, quick_short, long_video, research_only, storyboard_only, prompt_only, seo_only)
+- `POST /api/jobs` — enqueue `{ workflow, trend_id, format, voice_style, force, priority }`
+- `GET  /api/jobs?status=&limit=` — recent jobs
+- `GET  /api/jobs/{id}` — job status (progress, steps, current_step, eta)
+- `POST /api/jobs/{id}/cancel|pause|resume|retry`
+
+- `POST /api/ai/quality/{id}?format=` — Quality Review Agent (recommendations only)
+
+Developer panel + prompt engine tools:
+- `GET  /api/dev/stats` — cache, queue, DB and prompt stats
+- `GET  /api/dev/logs?lines=` — tail of the structured log
+- `GET  /api/dev/prompts/{name}` — raw template, version, variables
+- `POST /api/dev/prompts/{name}/preview?trend_id=&format=` — render + validate a prompt
+- `GET  /api/dev/generations?trend_id=&kind=` — AI generation history (for compare)
+- `GET  /api/dev/generations/{id}` — the exact prompt used + response
+
 ## Content (placeholder)
 
 - `GET /api/content/status`

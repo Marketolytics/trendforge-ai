@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Download, Sparkles, RefreshCw, ExternalLink } from "lucide-react";
-import { studioApi, type ModuleKind, type Trend } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { Download, Sparkles, RefreshCw, ExternalLink, Workflow as WorkflowIcon } from "lucide-react";
+import { orchestratorApi, studioApi, type ModuleKind, type Trend, type WorkflowTemplate } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScoreRing } from "@/components/trends/ScoreRing";
+import { useJobs } from "@/store/jobs";
 import { StoryboardTimeline } from "./StoryboardTimeline";
 import { ModulePanel } from "./ModulePanel";
 import { MODULE_LABELS, MODULE_ORDER, useWorkspace } from "./useWorkspace";
@@ -13,9 +14,30 @@ const TAB_KINDS: ModuleKind[] = MODULE_ORDER.filter((k) => k !== "storyboard");
 
 export function Workspace({ trend }: { trend: Trend }) {
   const ws = useWorkspace(trend.id);
+  const { jobs, enqueue } = useJobs();
   const [tab, setTab] = useState<ModuleKind>("script");
+  const [workflows, setWorkflows] = useState<WorkflowTemplate[]>([]);
+  const [workflow, setWorkflow] = useState("complete");
   const generating = ws.packageStatus === "generating";
   const moduleCount = Object.keys(ws.modules).length;
+
+  useEffect(() => {
+    orchestratorApi.workflows().then(setWorkflows).catch(() => void 0);
+  }, []);
+
+  // Reload the package when a background workflow for this trend completes.
+  const processed = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const j of jobs) {
+      if (j.trend_id === trend.id && j.status === "completed" && !processed.current.has(j.id)) {
+        processed.current.add(j.id);
+        ws.reload();
+      }
+    }
+  }, [jobs, trend.id, ws]);
+
+  const runWorkflow = () =>
+    enqueue({ workflow, trend_id: trend.id, format: ws.format, voice_style: ws.voiceStyle });
 
   const statusDot = (kind: ModuleKind) => {
     const s = ws.moduleStatus[kind];
@@ -107,6 +129,31 @@ export function Workspace({ trend }: { trend: Trend }) {
                 Regenerate all
               </Button>
             )}
+          </div>
+
+          {/* Background workflow runner */}
+          <div className="surface p-4">
+            <p className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-[var(--muted-foreground)]">
+              <WorkflowIcon className="h-3.5 w-3.5" /> Run as workflow
+            </p>
+            <select
+              value={workflow}
+              onChange={(e) => setWorkflow(e.target.value)}
+              className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--card)] px-2 text-sm outline-none focus:border-[var(--ring)]"
+            >
+              {workflows.map((w) => (
+                <option key={w.name} value={w.name}>
+                  {w.label}
+                </option>
+              ))}
+            </select>
+            <Button variant="outline" className="mt-2 w-full" onClick={runWorkflow}>
+              <WorkflowIcon className="h-4 w-4" />
+              Queue workflow
+            </Button>
+            <p className="mt-1.5 text-[11px] text-[var(--muted-foreground)]">
+              Runs in the background — track it in the monitor.
+            </p>
           </div>
 
           {/* Module completion */}

@@ -169,6 +169,50 @@ class Favorite(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow, index=True)
 
 
+class Job(SQLModel, table=True):
+    """A background workflow job coordinated by the orchestrator."""
+
+    __tablename__ = "jobs"
+
+    id: str = Field(primary_key=True, description="uuid")
+    workflow: str = Field(index=True)
+    trend_id: int | None = Field(default=None, index=True)
+    variant: str = Field(default="")
+    params: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    priority: int = Field(default=5, index=True, description="lower = higher priority")
+    status: str = Field(default="queued", index=True, description="queued|running|paused|completed|failed|cancelled")
+    progress: float = Field(default=0.0)
+    current_step: str = Field(default="")
+    steps: list = Field(default_factory=list, sa_column=Column(JSON))
+    result: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    error: str | None = None
+    eta_seconds: int | None = None
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+    updated_at: datetime = Field(default_factory=utcnow)
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+
+
+class GenerationLog(SQLModel, table=True):
+    """Append-only log of AI generations (for response history + compare)."""
+
+    __tablename__ = "generation_log"
+
+    id: int | None = Field(default=None, primary_key=True)
+    job_id: str | None = Field(default=None, index=True)
+    trend_id: int | None = Field(default=None, index=True)
+    kind: str = Field(index=True)
+    variant: str = Field(default="")
+    prompt_version: str = Field(default="")
+    prompt_text: str | None = Field(default=None, sa_column=Column(Text))
+    response: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    prompt_chars: int = Field(default=0)
+    response_chars: int = Field(default=0)
+    duration_ms: int = Field(default=0)
+    cached: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=utcnow, index=True)
+
+
 class CachedRequest(SQLModel, table=True):
     """A cached HTTP / API response keyed by a stable request signature."""
 

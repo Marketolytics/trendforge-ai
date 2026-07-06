@@ -9,10 +9,12 @@ from app.api.routes import (
     cache,
     competitors,
     content,
+    dev,
     favorites,
     health,
     history,
     intelligence,
+    orchestrator,
     settings,
     sources,
     trends,
@@ -29,4 +31,6 @@ api_router.include_router(ai.router)
 api_router.include_router(competitors.router)
 api_router.include_router(favorites.router)
 api_router.include_router(intelligence.router)
+api_router.include_router(orchestrator.router)
+api_router.include_router(dev.router)
 api_router.include_router(content.router)

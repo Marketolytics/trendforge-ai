@@ -1,11 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { NAV_ITEMS } from "./navigation";
 import { TrendsProvider } from "@/store/trends";
+import { JobsProvider } from "@/store/jobs";
 import { AnalysisPanel } from "@/components/trends/analysis/AnalysisPanel";
+import { JobMonitor } from "@/components/jobs/JobMonitor";
+import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/": {
@@ -30,6 +33,19 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [devOpen, setDevOpen] = useState(false);
+
+  // Developer mode toggle: Ctrl/Cmd + Shift + D.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        setDevOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const meta =
     PAGE_META[location.pathname] ??
     (location.pathname.startsWith("/studio")
@@ -53,27 +69,31 @@ export function AppShell() {
 
   return (
     <TrendsProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
-        <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header title={meta.title} subtitle={meta.subtitle} />
-          <main className="flex-1 overflow-y-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.18, ease: "easeOut" }}
-                className="mx-auto max-w-6xl px-6 py-6"
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
-          </main>
+      <JobsProvider>
+        <div className="flex h-screen w-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+          <Sidebar />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <Header title={meta.title} subtitle={meta.subtitle} />
+            <main className="flex-1 overflow-y-auto">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  className="mx-auto max-w-6xl px-6 py-6"
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            </main>
+          </div>
+          <AnalysisPanel />
+          <JobMonitor />
+          <DeveloperPanel open={devOpen} onClose={() => setDevOpen(false)} />
         </div>
-        <AnalysisPanel />
-      </div>
+      </JobsProvider>
     </TrendsProvider>
   );
 }

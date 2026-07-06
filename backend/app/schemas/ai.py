@@ -422,6 +422,26 @@ class MultiIdeas(BaseModel):
 
 
 # ==========================================================================
+# Sprint 6 — Quality review
+# ==========================================================================
+
+
+class AreaAssessment(BaseModel):
+    area: str
+    score: int = 0
+    note: str = ""
+
+
+class QualityReview(BaseModel):
+    quality_score: int = 0
+    export_ready: bool = False
+    assessments: list[AreaAssessment] = Field(default_factory=list)
+    improvement_suggestions: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    factual_risks: list[str] = Field(default_factory=list)
+
+
+# ==========================================================================
 
 
 class AIEnvelope(BaseModel):

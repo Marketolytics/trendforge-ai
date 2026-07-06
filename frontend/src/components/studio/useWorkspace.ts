@@ -38,6 +38,7 @@ export interface Workspace {
 
   generatePackage: (force?: boolean) => Promise<void>;
   generateModule: (kind: ModuleKind, force?: boolean) => Promise<void>;
+  reload: () => Promise<void>;
 }
 
 export function useWorkspace(trendId: number): Workspace {
@@ -149,6 +150,7 @@ export function useWorkspace(trendId: number): Workspace {
     notConfigured,
     generatePackage,
     generateModule,
+    reload: loadExisting,
   };
 }
 

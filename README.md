@@ -102,5 +102,13 @@ The default backend port is **8756**.
   **Intelligence** workspace with tabs (Overview, Competitors, Opportunities,
   Forecast, History, Favorites, Analytics) and virtualized tables.
 
+- **Sprint 6** — AI Orchestrator & Background Processing: a workflow engine that
+  coordinates every AI stage through independent agents (common interface), a
+  persistent background job queue (priority, progress, ETA, pause/resume/cancel/
+  retry, resume-after-restart), reusable workflow templates, a Quality Review
+  agent, append-only generation logging (view prompt used, compare responses),
+  and robust per-stage retry. The UI adds a live **Job Monitor** and a
+  **Developer panel** (⌃⇧D) showing queue/cache/DB stats, logs and prompt tools.
+
 To enable AI: open **Settings** in the app and paste your Gemini API key
 (or set `TRENDFORGE_GEMINI_API_KEY` in `backend/.env`).

@@ -25,6 +25,13 @@ async def lifespan(app: FastAPI):
     run_migrations()
     SettingsService.seed_defaults()
     seed_sources()
+
+    # Start the orchestrator worker and resume any interrupted jobs.
+    from app.services.orchestrator import engine as orchestrator
+
+    orchestrator.start_worker()
+    orchestrator.resume_pending()
+
     get_logger("trendforge").info(
         "TrendForge backend ready",
         extra={"category": "general", "version": settings.version},

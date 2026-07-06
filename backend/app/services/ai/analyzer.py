@@ -24,7 +24,13 @@ from sqlalchemy import or_
 from sqlmodel import Session, select
 
 from app.core.logging import get_logger, log_ai
-from app.db.models import CompetitorVideo, GeneratedContent, History, Trend
+from app.db.models import (
+    CompetitorVideo,
+    GeneratedContent,
+    GenerationLog,
+    History,
+    Trend,
+)
 from app.db.session import engine
 from app.schemas.ai import (
     BRoll,
@@ -35,6 +41,7 @@ from app.schemas.ai import (
     ImagePrompts,
     MultiIdeas,
     ProductionChecklist,
+    QualityReview,
     Script,
     SEOPackage,
     Storyboard,
@@ -237,6 +244,26 @@ def _b_multi_ideas(session, trend, params, variant, base):
     return base
 
 
+def _project_assets(session: Session, trend_id: int, variant: str) -> str:
+    """Compact JSON of every generated module for a project (for review)."""
+    rows = session.exec(
+        select(GeneratedContent)
+        .where(GeneratedContent.trend_id == trend_id)
+        .where(GeneratedContent.variant == variant)
+        .where(GeneratedContent.kind != "quality_review")
+    ).all()
+    if not rows:
+        return "(nothing generated yet)"
+    assets = {r.kind: (r.payload or {}).get("data", {}) for r in rows}
+    return json.dumps(assets, ensure_ascii=False, default=str)[:24000]
+
+
+def _b_quality_review(session, trend, params, variant, base):
+    base = _with_format(params, base)
+    base["assets"] = _project_assets(session, trend.id, variant)
+    return base
+
+
 # --- generator registry ---------------------------------------------------
 
 @dataclass(frozen=True)
@@ -271,6 +298,8 @@ GENERATORS: dict[str, GenSpec] = {
     "upload_advisor": GenSpec("upload_advisor", UploadAdvice, _b_upload_advisor),
     "competitor_gap": GenSpec("competitor_gap", CompetitorGap, _b_competitor_gap),
     "multi_ideas": GenSpec("multi_ideas", MultiIdeas, _b_multi_ideas),
+    # Sprint 6 — quality review (format-scoped, aggregates the project)
+    "quality_review": GenSpec("quality_review", QualityReview, _b_quality_review, uses_variant=True),
 }
 
 # Ordered module list for a full content package (dependency order).
@@ -315,7 +344,14 @@ def _envelope(kind: str, trend_id: int, variant: str, row_payload: dict, stored:
     }
 
 
-async def generate(trend_id: int, kind: str, *, params: dict | None = None, force: bool = False) -> dict:
+async def generate(
+    trend_id: int,
+    kind: str,
+    *,
+    params: dict | None = None,
+    force: bool = False,
+    job_id: str | None = None,
+) -> dict:
     """Generate (or fetch cached) output of ``kind`` for a trend."""
     if kind not in GENERATORS:
         raise ValueError(f"unknown generation kind: {kind}")
@@ -365,6 +401,21 @@ async def generate(trend_id: int, kind: str, *, params: dict | None = None, forc
                 status="success",
                 duration_ms=generation_ms,
                 detail={"kind": kind, "variant": variant, "version": template.version},
+            )
+        )
+        session.add(
+            GenerationLog(
+                job_id=job_id,
+                trend_id=trend_id,
+                kind=kind,
+                variant=variant,
+                prompt_version=template.version,
+                prompt_text=rendered,
+                response=data,
+                prompt_chars=len(rendered),
+                response_chars=len(raw),
+                duration_ms=generation_ms,
+                cached=False,
             )
         )
         session.commit()

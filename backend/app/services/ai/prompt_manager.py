@@ -94,5 +94,28 @@ class PromptManager:
             result.append({"name": tpl.name, "version": tpl.version, "description": tpl.description})
         return result
 
+    def variables(self, name: str) -> list[str]:
+        """Return the distinct ``{{variable}}`` names used by a template."""
+        template = self.get(name)
+        seen: list[str] = []
+        for match in _VAR_RE.finditer(template.body):
+            var = match.group(1)
+            if var not in seen:
+                seen.append(var)
+        return seen
+
+    def validate(self, name: str, context: dict) -> dict:
+        """Validate a template renders with the given context."""
+        variables = self.variables(name)
+        missing = [v for v in variables if context.get(v) in (None, "")]
+        rendered = self.get(name).render(context)
+        return {
+            "name": name,
+            "variables": variables,
+            "missing": missing,
+            "valid": "{{" not in rendered,
+            "rendered_chars": len(rendered),
+        }
+
 
 prompt_manager = PromptManager()
