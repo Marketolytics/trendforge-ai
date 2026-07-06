@@ -82,16 +82,25 @@ pub fn run() {
                 owned,
             });
 
-            // Health monitor: if we own the backend and it dies, restart it.
+            // Health monitor: only restart after the backend has been up at
+            // least once and then goes away (a genuine crash) — never during the
+            // initial cold start, which can take several seconds.
             if owned {
                 let handle = app.handle().clone();
-                std::thread::spawn(move || loop {
-                    std::thread::sleep(Duration::from_secs(5));
-                    if !port_open(port) {
-                        log::warn!("backend not responding on {port}; restarting");
-                        if let Some(new_child) = spawn_backend(&handle, port) {
-                            let state = handle.state::<Backend>();
-                            *state.child.lock().unwrap() = Some(new_child);
+                std::thread::spawn(move || {
+                    let mut was_up = false;
+                    loop {
+                        std::thread::sleep(Duration::from_secs(3));
+                        let up = port_open(port);
+                        if up {
+                            was_up = true;
+                        } else if was_up {
+                            log::warn!("backend stopped responding on {port}; restarting");
+                            was_up = false;
+                            if let Some(new_child) = spawn_backend(&handle, port) {
+                                let state = handle.state::<Backend>();
+                                *state.child.lock().unwrap() = Some(new_child);
+                            }
                         }
                     }
                 });

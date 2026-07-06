@@ -9,7 +9,10 @@
 import { getApiBaseUrl, setApiBaseUrl } from "@/lib/api";
 
 export function isTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI__" in window;
+  return (
+    typeof window !== "undefined" &&
+    ("__TAURI_INTERNALS__" in window || "__TAURI__" in window)
+  );
 }
 
 /** Ask the desktop launcher which URL the backend bound to (Tauri only). */

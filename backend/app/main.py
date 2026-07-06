@@ -87,10 +87,14 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Local-only single-user app: the backend is bound to 127.0.0.1 and uses no
+    # cookie credentials, so allow any local origin. This covers the Tauri
+    # webview origin (http://tauri.localhost on Windows), the Vite dev server,
+    # and any auto-selected port — avoiding origin/CORS surprises.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origin_list,
-        allow_credentials=True,
+        allow_origins=["*"],
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
