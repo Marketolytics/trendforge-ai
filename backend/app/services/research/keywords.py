@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.services.collectors.base import _STOPWORDS, extract_keywords, normalize_title
 
@@ -29,7 +29,7 @@ def _ngrams(text: str, n: int) -> list[str]:
 def _as_utc(dt: datetime | None) -> datetime | None:
     if dt is None:
         return None
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
 
 
 def compute(members: list[dict]) -> dict:
@@ -38,7 +38,7 @@ def compute(members: list[dict]) -> dict:
     recent_kw: Counter = Counter()
     older_kw: Counter = Counter()
 
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
+    cutoff = datetime.now(UTC) - timedelta(hours=48)
 
     for m in members:
         title = m.get("title", "") or ""

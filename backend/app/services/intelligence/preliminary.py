@@ -8,7 +8,7 @@ log-normalized popularity and corroboration (cluster size).
 from __future__ import annotations
 
 import math
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.services.collectors.base import StandardTrend
 
@@ -24,8 +24,8 @@ def _hours_since(dt: datetime | None) -> float:
     if dt is None:
         return FRESHNESS_WINDOW_HOURS  # unknown age -> treat as stale-ish
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    delta = datetime.now(timezone.utc) - dt
+        dt = dt.replace(tzinfo=UTC)
+    delta = datetime.now(UTC) - dt
     return max(delta.total_seconds() / 3600.0, 0.0)
 
 

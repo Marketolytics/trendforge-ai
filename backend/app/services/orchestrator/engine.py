@@ -11,14 +11,14 @@ from __future__ import annotations
 import asyncio
 import itertools
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlmodel import Session, select
 
 from app.core.logging import get_logger, log_event
 from app.db.models import Job
 from app.db.session import engine as db_engine
-from app.services.orchestrator.agents import AGENTS, JobContext, agent_label, get_agent
+from app.services.orchestrator.agents import JobContext, agent_label, get_agent
 from app.services.orchestrator.workflows import get_workflow
 
 log = get_logger("trendforge.orchestrator")
@@ -31,7 +31,7 @@ _worker_task: asyncio.Task | None = None
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # --- job persistence ------------------------------------------------------

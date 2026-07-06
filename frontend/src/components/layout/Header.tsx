@@ -8,9 +8,10 @@ import { BackendStatus } from "./BackendStatus";
 interface HeaderProps {
   title: string;
   subtitle?: string;
+  onSearch?: () => void;
 }
 
-export function Header({ title, subtitle }: HeaderProps) {
+export function Header({ title, subtitle, onSearch }: HeaderProps) {
   const navigate = useNavigate();
   const { refresh, status } = useTrends();
   const refreshing = status === "refreshing";
@@ -28,18 +29,18 @@ export function Header({ title, subtitle }: HeaderProps) {
         )}
       </div>
 
-      {/* Search */}
+      {/* Search (opens command palette) */}
       <div className="ml-auto hidden items-center md:flex">
-        <div className="flex h-9 w-64 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--card)] px-3 text-[var(--muted-foreground)] transition-colors focus-within:border-[var(--ring)]">
+        <button
+          onClick={onSearch}
+          className="flex h-9 w-64 items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--card)] px-3 text-[var(--muted-foreground)] transition-colors hover:border-[var(--ring)]"
+        >
           <Search className="h-4 w-4" />
-          <input
-            placeholder="Search trends…"
-            className="w-full bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]"
-          />
+          <span className="flex-1 text-left text-sm">Search everything…</span>
           <kbd className="rounded border border-[var(--border)] bg-[var(--background)] px-1.5 text-[10px]">
-            /
+            ⌘K
           </kbd>
-        </div>
+        </button>
       </div>
 
       <div className="flex items-center gap-2">

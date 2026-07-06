@@ -79,8 +79,14 @@ export interface AppSettings {
   refresh_interval: number;
   cache_duration: number;
   theme: string;
+  language: string;
   output_folder: string;
   log_level: string;
+  notifications: boolean;
+  developer_mode: boolean;
+  experimental: boolean;
+  auto_backup: boolean;
+  update_url: string;
   gemini_api_key: string;
   gemini_api_key_set: boolean;
   gemini_model: string;
@@ -902,5 +908,53 @@ export const researchApi = {
   enrich: (trendId: number, force = false) =>
     request<AiEnvelope<ResearchAI>>(`/api/ai/research/${trendId}${query({ force: force ? "true" : undefined })}`, {
       method: "POST",
+    }),
+};
+
+// --- Sprint 8: search, system, backup ------------------------------------
+
+export interface SearchResult {
+  type: "trend" | "research" | "favorite" | "content" | string;
+  id: number | null;
+  title: string;
+  subtitle: string;
+  variant?: string;
+}
+
+export const searchApi = {
+  search: (q: string) => request<{ query: string; results: SearchResult[] }>(`/api/search${query({ q })}`),
+};
+
+export interface VersionInfo {
+  name: string;
+  version: string;
+}
+export interface UpdateInfo {
+  current: string;
+  latest: string;
+  update_available: boolean;
+  checked: boolean;
+  error?: string;
+}
+
+export const systemApi = {
+  version: () => request<VersionInfo>("/api/version"),
+  updateCheck: () => request<UpdateInfo>("/api/update-check", { method: "POST" }),
+};
+
+export const backupApi = {
+  downloadUrl: () => `${API_BASE_URL}/api/backup`,
+  restore: async (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_BASE_URL}/api/backup/restore`, { method: "POST", body: form });
+    if (!res.ok) throw new ApiError(`Restore failed (${res.status})`, res.status);
+    return res.json() as Promise<{ ok: boolean; restart_recommended: boolean }>;
+  },
+  exportProjectUrl: (trendId: number) => `${API_BASE_URL}/api/backup/project/${trendId}`,
+  importProject: (bundle: unknown) =>
+    request<{ ok: boolean; trend_id: number }>("/api/backup/project", {
+      method: "POST",
+      body: JSON.stringify(bundle),
     }),
 };

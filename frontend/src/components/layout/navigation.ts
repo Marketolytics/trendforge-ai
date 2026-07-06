@@ -4,6 +4,7 @@ import {
   Microscope,
   Clapperboard,
   Radar,
+  Download,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -21,5 +22,6 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Research", to: "/research", icon: Microscope, shortcut: "3" },
   { label: "Studio", to: "/studio", icon: Clapperboard, shortcut: "4" },
   { label: "Intelligence", to: "/intelligence", icon: Radar, shortcut: "5" },
-  { label: "Settings", to: "/settings", icon: Settings, shortcut: "6" },
+  { label: "Export", to: "/export", icon: Download, shortcut: "6" },
+  { label: "Settings", to: "/settings", icon: Settings, shortcut: "7" },
 ];

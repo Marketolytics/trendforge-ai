@@ -9,6 +9,9 @@ import { JobsProvider } from "@/store/jobs";
 import { AnalysisPanel } from "@/components/trends/analysis/AnalysisPanel";
 import { JobMonitor } from "@/components/jobs/JobMonitor";
 import { DeveloperPanel } from "@/components/dev/DeveloperPanel";
+import { CommandPalette } from "@/components/command/CommandPalette";
+import { UpdateBanner } from "@/components/common/UpdateBanner";
+import { toggleTheme } from "@/lib/theme";
 
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/": {
@@ -31,20 +34,33 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Creator Intelligence",
     subtitle: "Competitors, gaps, forecasts, history, favorites and analytics.",
   },
-  "/settings": { title: "Settings", subtitle: "Sources, AI keys, preferences." },
+  "/export": {
+    title: "Export Center",
+    subtitle: "Export packages, back up your data and move projects.",
+  },
+  "/settings": { title: "Settings", subtitle: "AI keys, appearance, data, notifications, developer." },
 };
 
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const [devOpen, setDevOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
-  // Developer mode toggle: Ctrl/Cmd + Shift + D.
+  // Global shortcuts: Ctrl/Cmd+K palette, "/" search, Ctrl/Cmd+Shift+D dev panel.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") {
+      const target = e.target as HTMLElement;
+      const typing = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "d") {
         e.preventDefault();
         setDevOpen((o) => !o);
+      } else if (e.key === "/" && !typing) {
+        e.preventDefault();
+        setPaletteOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -76,7 +92,8 @@ export function AppShell() {
         <div className="flex h-screen w-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
           <Sidebar />
           <div className="flex min-w-0 flex-1 flex-col">
-            <Header title={meta.title} subtitle={meta.subtitle} />
+            <UpdateBanner />
+            <Header title={meta.title} subtitle={meta.subtitle} onSearch={() => setPaletteOpen(true)} />
             <main className="flex-1 overflow-y-auto">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -95,6 +112,12 @@ export function AppShell() {
           <AnalysisPanel />
           <JobMonitor />
           <DeveloperPanel open={devOpen} onClose={() => setDevOpen(false)} />
+          <CommandPalette
+            open={paletteOpen}
+            onClose={() => setPaletteOpen(false)}
+            onToggleTheme={toggleTheme}
+            onToggleDev={() => setDevOpen((o) => !o)}
+          />
         </div>
       </JobsProvider>
     </TrendsProvider>

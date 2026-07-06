@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from time import mktime, struct_time
 from typing import Any
 
@@ -28,7 +28,7 @@ def _struct_to_dt(value: struct_time | None) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.fromtimestamp(mktime(value), tz=timezone.utc)
+        return datetime.fromtimestamp(mktime(value), tz=UTC)
     except (OverflowError, ValueError):
         return None
 

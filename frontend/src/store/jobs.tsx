@@ -10,6 +10,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { orchestratorApi, isActiveJob, type Job, type JobCreate } from "@/lib/api";
+import { notify } from "@/lib/notifications";
 
 interface JobsState {
   jobs: Job[];
@@ -27,6 +28,20 @@ const JobsContext = createContext<JobsState | null>(null);
 export function JobsProvider({ children }: { children: ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const timer = useRef<number | null>(null);
+  const notified = useRef<Set<string>>(new Set());
+
+  // Desktop notification when a job finishes.
+  useEffect(() => {
+    for (const j of jobs) {
+      if ((j.status === "completed" || j.status === "failed") && j.finished_at && !notified.current.has(j.id)) {
+        notified.current.add(j.id);
+        notify(
+          j.status === "completed" ? "Workflow complete" : "Workflow failed",
+          `${j.workflow.replace("_", " ")} · ${j.status}`,
+        );
+      }
+    }
+  }, [jobs]);
 
   const refresh = useCallback(async () => {
     try {

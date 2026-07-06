@@ -1,6 +1,6 @@
 [package]
 name = "trendforge-ai"
-version = "0.1.0"
+version = "1.0.0"
 description = "TrendForge AI - Content Intelligence Desktop Application"
 authors = ["TrendForge"]
 edition = "2021"

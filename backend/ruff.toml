@@ -1,0 +1,16 @@
+line-length = 110
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = [
+    "E501",   # line length handled by formatter
+    "B008",   # FastAPI uses callables in defaults (Depends/Query/File)
+    "B904",   # explicit-from in excepts not always needed
+    "B905",   # zip strict= not required for equal-length sequences
+    "UP047",  # PEP 695 generic syntax not required
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["E402"]  # test setup imports after env configuration
+"app/services/ai/analyzer.py" = ["E402"]

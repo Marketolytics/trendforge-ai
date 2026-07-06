@@ -22,12 +22,58 @@ EDITABLE_DEFAULTS: dict[str, str] = {
     "refresh_interval": str(env_settings.refresh_interval),
     "cache_duration": str(env_settings.cache_duration),
     "theme": env_settings.theme,
+    "language": env_settings.language,
     "output_folder": str(env_settings.resolved_output_folder),
     "log_level": env_settings.log_level,
+    "notifications": str(env_settings.notifications).lower(),
+    "developer_mode": str(env_settings.developer_mode).lower(),
+    "experimental": str(env_settings.experimental).lower(),
+    "auto_backup": str(env_settings.auto_backup).lower(),
+    "update_url": env_settings.update_url,
 }
 
 # Keys whose value should never be returned in plaintext by the API.
 SECRET_KEYS = {"gemini_api_key"}
+
+BOOL_KEYS = {"notifications", "developer_mode", "experimental", "auto_backup"}
+
+
+class SettingValidationError(ValueError):
+    """Raised when a setting fails validation."""
+
+
+_ALLOWED_LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+_ALLOWED_THEMES = {"dark", "light"}
+
+
+def validate_settings(values: dict) -> dict:
+    """Validate + normalize a partial settings update. Raises on bad input."""
+    clean: dict = {}
+    for key, value in values.items():
+        if key not in EDITABLE_DEFAULTS:
+            continue
+        if key in ("refresh_interval", "cache_duration"):
+            try:
+                ivalue = int(value)
+            except (TypeError, ValueError) as exc:
+                raise SettingValidationError(f"{key} must be an integer") from exc
+            if ivalue < 30:
+                raise SettingValidationError(f"{key} must be at least 30 seconds")
+            clean[key] = ivalue
+        elif key == "log_level":
+            level = str(value).upper()
+            if level not in _ALLOWED_LOG_LEVELS:
+                raise SettingValidationError(f"log_level must be one of {sorted(_ALLOWED_LOG_LEVELS)}")
+            clean[key] = level
+        elif key == "theme":
+            if str(value) not in _ALLOWED_THEMES:
+                raise SettingValidationError("theme must be 'dark' or 'light'")
+            clean[key] = str(value)
+        elif key in BOOL_KEYS:
+            clean[key] = str(value).lower() in ("1", "true", "yes", "on") if not isinstance(value, bool) else value
+        else:
+            clean[key] = value
+    return clean
 
 
 class SettingsService:
@@ -95,4 +141,8 @@ class SettingsService:
                 result[numeric] = int(result[numeric])
             except (TypeError, ValueError):
                 pass
+        # Coerce boolean fields.
+        for key in BOOL_KEYS:
+            if key in result:
+                result[key] = str(result[key]).lower() in ("1", "true", "yes", "on")
         return result

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import Session, select
@@ -40,7 +40,7 @@ def list_trends(
     window_hours: int = Query(48, ge=1, le=168, description="Recency window"),
 ) -> TrendListResponse:
     """Return the highest-scoring recent trends."""
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours)
+    cutoff = datetime.now(UTC) - timedelta(hours=window_hours)
     with Session(engine) as session:
         stmt = select(Trend).where(Trend.collection_timestamp >= cutoff)
         if category:
@@ -53,7 +53,7 @@ def list_trends(
     return TrendListResponse(
         trends=[TrendOut.model_validate(r) for r in rows],
         count=len(rows),
-        generated_at=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
     )
 
 

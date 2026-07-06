@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from time import mktime
 from typing import Any
 
@@ -81,7 +81,7 @@ class GoogleTrendsCollector(BaseCollector):
             if entry.get("published_parsed"):
                 try:
                     published = datetime.fromtimestamp(
-                        mktime(entry["published_parsed"]), tz=timezone.utc
+                        mktime(entry["published_parsed"]), tz=UTC
                     )
                 except (OverflowError, ValueError):
                     published = None

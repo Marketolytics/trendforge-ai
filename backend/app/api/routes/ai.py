@@ -15,7 +15,8 @@ from sqlmodel import Session
 from app.db.models import Trend
 from app.db.session import engine
 from app.schemas.ai import AIEnvelope, AIStatus, PromptInfo
-from app.services.ai import analyzer, package as package_service
+from app.services.ai import analyzer
+from app.services.ai import package as package_service
 from app.services.ai.export import export_single, export_zip
 from app.services.ai.formats import DEFAULT_FORMAT, FORMATS, VOICE_STYLES
 from app.services.ai.gemini_service import (

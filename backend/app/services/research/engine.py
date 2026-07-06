@@ -8,7 +8,7 @@ offline. The AI verification layer enriches it separately.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from difflib import SequenceMatcher
 
 from sqlalchemy import or_
@@ -31,7 +31,7 @@ MAX_CANDIDATES = 80
 def _iso(dt: datetime | None) -> str | None:
     if dt is None:
         return None
-    return (dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)).isoformat()
+    return (dt if dt.tzinfo else dt.replace(tzinfo=UTC)).isoformat()
 
 
 def _candidates(session: Session, seed: Trend) -> list[Trend]:

@@ -10,17 +10,16 @@ from __future__ import annotations
 
 import asyncio
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from time import mktime
 
 import feedparser
-import httpx
+from sqlmodel import Session, select
 
 from app.core.logging import get_logger, log_network_error
 from app.db.models import CompetitorChannel, CompetitorVideo, utcnow
 from app.db.session import engine
 from app.services.collectors.net import USER_AGENT, fetch_text
-from sqlmodel import Session, select
 
 log = get_logger("trendforge.intelligence.competitors")
 
@@ -155,7 +154,7 @@ async def refresh_channel(channel_pk: int) -> int:
             if entry.get("published_parsed"):
                 try:
                     published = datetime.fromtimestamp(
-                        mktime(entry["published_parsed"]), tz=timezone.utc
+                        mktime(entry["published_parsed"]), tz=UTC
                     )
                 except (OverflowError, ValueError):
                     published = None

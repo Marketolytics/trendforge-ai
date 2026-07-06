@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from difflib import SequenceMatcher
 
 from sqlmodel import Session, select
@@ -117,7 +117,7 @@ def _dedupe_and_cluster(items: list[StandardTrend]) -> list[StandardTrend]:
                 cluster.append(j)
 
         members = [unique[k] for k in cluster]
-        rep = max(members, key=lambda t: (t.popularity_score, t.published_time or datetime.min.replace(tzinfo=timezone.utc)))
+        rep = max(members, key=lambda t: (t.popularity_score, t.published_time or datetime.min.replace(tzinfo=UTC)))
         rep.cluster_id = rep.content_hash
         rep.cluster_size = len(members)
         # Merge keywords across the cluster (unique, capped).

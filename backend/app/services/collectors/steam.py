@@ -7,7 +7,7 @@ items for a configured set of app IDs.
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from app.core.logging import get_logger, log_network_error
@@ -64,7 +64,7 @@ class SteamCollector(BaseCollector):
 
         body = _TAG_RE.sub("", item.get("contents") or "").strip()
         date = item.get("date")
-        published = datetime.fromtimestamp(date, tz=timezone.utc) if date else None
+        published = datetime.fromtimestamp(date, tz=UTC) if date else None
 
         return StandardTrend(
             title=title,

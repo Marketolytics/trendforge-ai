@@ -6,7 +6,7 @@ import io
 import json
 import re
 import zipfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 KIND_LABELS: dict[str, str] = {
     "script": "Script",
@@ -84,7 +84,7 @@ def export_single(kind: str, data: dict, trend_title: str, fmt: str = "md") -> t
 def export_zip(trend_title: str, format_label: str, modules: dict[str, dict]) -> tuple[str, bytes]:
     """Bundle every module into a ZIP (Markdown per module + package.json)."""
     buffer = io.BytesIO()
-    generated = datetime.now(timezone.utc).isoformat()
+    generated = datetime.now(UTC).isoformat()
 
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
         index = [

@@ -9,8 +9,8 @@ is no duplicated logic — the agent layer only adds orchestration semantics.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 from app.services.ai import analyzer
 

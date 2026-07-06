@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.config import settings
@@ -32,6 +33,15 @@ async def lifespan(app: FastAPI):
     orchestrator.start_worker()
     orchestrator.resume_pending()
 
+    # Optional automatic backup on startup.
+    if SettingsService.all(mask_secrets=False).get("auto_backup"):
+        try:
+            from app.services.backup_service import write_auto_backup
+
+            write_auto_backup()
+        except Exception:  # noqa: BLE001
+            pass
+
     get_logger("trendforge").info(
         "TrendForge backend ready",
         extra={"category": "general", "version": settings.version},
@@ -55,6 +65,17 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(api_router)
+
+    @app.exception_handler(Exception)
+    async def _unhandled(request: Request, exc: Exception):  # noqa: ANN202
+        get_logger("trendforge.error").error(
+            "unhandled request error",
+            extra={"category": "error", "path": str(request.url.path), "error": str(exc)},
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "An unexpected error occurred. Please try again."},
+        )
 
     @app.get("/")
     def root() -> dict[str, str]:

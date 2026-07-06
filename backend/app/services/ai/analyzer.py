@@ -15,9 +15,9 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Callable
+from datetime import UTC, datetime
 
 from pydantic import BaseModel
 from sqlalchemy import or_
@@ -57,10 +57,10 @@ from app.schemas.ai import (
     VoiceOver,
 )
 from app.services.ai.formats import DEFAULT_FORMAT, get_format
-from app.services.intelligence.patterns import patterns_summary_text
 from app.services.ai.gemini_service import gemini_service
 from app.services.ai.prompt_manager import prompt_manager
 from app.services.ai.response_parser import parse_into
+from app.services.intelligence.patterns import patterns_summary_text
 
 log = get_logger("trendforge.ai.analyzer")
 
@@ -77,7 +77,7 @@ def _iso(dt: datetime | None) -> str:
     if dt is None:
         return "unknown"
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt.isoformat()
 
 
@@ -403,7 +403,7 @@ async def generate(
     generation_ms = int((time.perf_counter() - start) * 1000)
     data = model.model_dump()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload = {"version": template.version, "data": data}
     with Session(engine) as session:
         row = _load_stored(session, trend_id, kind, variant)

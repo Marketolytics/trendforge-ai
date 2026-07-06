@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "TrendForge AI"
-    version: str = "0.2.0"
+    version: str = "1.0.0"
 
     host: str = "127.0.0.1"
     port: int = 8756
@@ -52,7 +52,13 @@ class Settings(BaseSettings):
     refresh_interval: int = 3600   # seconds between auto refreshes
     cache_duration: int = 1800     # seconds a cached request stays fresh
     theme: str = "dark"
+    language: str = "en"
     log_level: str = "INFO"
+    notifications: bool = True
+    developer_mode: bool = False
+    experimental: bool = False
+    auto_backup: bool = False
+    update_url: str = ""           # optional URL returning {"version": "x.y.z"}
 
     # ---------------------------------------------------------------------
     @property

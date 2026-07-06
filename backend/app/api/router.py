@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     ai,
+    backup,
     cache,
     competitors,
     content,
@@ -16,8 +17,10 @@ from app.api.routes import (
     intelligence,
     orchestrator,
     research,
+    search,
     settings,
     sources,
+    system,
     trends,
 )
 
@@ -34,5 +37,8 @@ api_router.include_router(favorites.router)
 api_router.include_router(intelligence.router)
 api_router.include_router(orchestrator.router)
 api_router.include_router(research.router)
+api_router.include_router(search.router)
+api_router.include_router(backup.router)
+api_router.include_router(system.router)
 api_router.include_router(dev.router)
 api_router.include_router(content.router)

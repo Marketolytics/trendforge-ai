@@ -143,3 +143,5 @@
 {"ts": "2026-07-06T19:14:54+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "0.2.0"}
 {"ts": "2026-07-06T19:14:54+0530", "level": "INFO", "logger": "trendforge.orchestrator", "category": "ai", "message": "orchestrator worker started"}
 {"ts": "2026-07-06T19:15:00+0530", "level": "INFO", "logger": "trendforge.research", "category": "general", "message": "research base built", "trend_id": 22, "members": 17, "sources": 7, "confidence": 62.0}
+{"ts": "2026-07-06T19:54:10+0530", "level": "INFO", "logger": "trendforge", "category": "general", "message": "TrendForge backend ready", "version": "1.0.0"}
+{"ts": "2026-07-06T19:54:10+0530", "level": "INFO", "logger": "trendforge.orchestrator", "category": "ai", "message": "orchestrator worker started"}

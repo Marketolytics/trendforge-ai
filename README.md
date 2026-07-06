@@ -120,5 +120,17 @@ The default backend port is **8756**.
   Entities, Community, Keywords, Verification) surfaces it with source badges,
   confidence indicators and MD/JSON/print export.
 
+- **Sprint 8 — v1.0** — Production readiness: route code-splitting (smaller,
+  faster startup), a global search + **command palette (Ctrl/⌘+K)**, an Export
+  Center with backup/restore and project import/export, an expanded validated
+  Settings Center, friendly error handling (backend handler + UI error
+  boundary), desktop notifications, an optional update checker, a **24-test**
+  automated suite (collectors, prompts, DB, exports, queue, workflow engine,
+  settings, research, backup), light/dark theme toggle, linting (ruff), and
+  finalized Tauri packaging config. See `DEVELOPER.md`.
+
 To enable AI: open **Settings** in the app and paste your Gemini API key
 (or set `TRENDFORGE_GEMINI_API_KEY` in `backend/.env`).
+
+**TrendForge AI v1.0 is feature complete.** See `DEVELOPER.md` for architecture,
+adding collectors/agents/workflows, and the release process.

@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 import statistics
 from collections import Counter
-from datetime import timezone
+from datetime import UTC
 
 from sqlmodel import Session, select
 
@@ -41,7 +41,7 @@ def compute_patterns(channel_pk: int | None = None) -> dict:
 
     for v in videos:
         if v.published:
-            pub = v.published if v.published.tzinfo else v.published.replace(tzinfo=timezone.utc)
+            pub = v.published if v.published.tzinfo else v.published.replace(tzinfo=UTC)
             day_hist[DAYS[pub.weekday()]] += 1
             hour_hist[pub.hour] += 1
             published_dates.append(pub)

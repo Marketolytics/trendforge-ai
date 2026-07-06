@@ -13,8 +13,9 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
-from datetime import datetime, timedelta, timezone
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from sqlalchemy import delete, func, select
 from sqlmodel import Session
@@ -29,7 +30,7 @@ log = get_logger("trendforge.cache")
 
 def _as_utc(dt: datetime) -> datetime:
     """Normalize a possibly-naive datetime (from SQLite) to aware UTC."""
-    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt.astimezone(timezone.utc)
+    return dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt.astimezone(UTC)
 
 
 def make_key(namespace: str, *parts: Any) -> str:
