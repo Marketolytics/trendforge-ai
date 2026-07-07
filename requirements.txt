@@ -1,3 +1,18 @@
-# Root requirements for Vercel's Python runtime. Delegates to the backend list
-# so there is a single source of truth.
--r backend/requirements.txt
+# Vercel Python runtime dependencies (serverless function: api/index.py).
+# Self-contained on purpose so Vercel's builder never has to resolve a nested
+# "-r" include. Keep runtime deps here in sync with backend/requirements.txt;
+# dev/test tools (pytest) and server-only extras (uvicorn, a2wsgi, PyMySQL) are
+# intentionally omitted from the serverless bundle.
+fastapi>=0.115.0
+sqlmodel>=0.0.22
+httpx>=0.27.0
+feedparser>=6.0.11
+pydantic>=2.8.0
+pydantic-settings>=2.4.0
+python-dotenv>=1.0.1
+python-multipart>=0.0.9
+keyring>=25.0.0
+google-genai>=1.0.0
+
+# PostgreSQL driver for production (Vercel Postgres / Neon / Supabase).
+psycopg[binary]>=3.1.0

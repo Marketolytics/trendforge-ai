@@ -14,6 +14,22 @@ Routing and the combined build are defined in `vercel.json`.
 
 ---
 
+## Fastest path (minimum steps)
+
+The repo is already configured, so the shortest route is:
+
+1. **Import** the GitHub repo at [vercel.com/new](https://vercel.com/new) and click **Deploy**.
+   With no environment variables the app still deploys and runs — it falls back
+   to an ephemeral SQLite DB under `/tmp` (data resets between invocations) and
+   AI features stay locked until a key is added. Nothing to configure to see it live.
+2. **To make it real**, add two env vars and redeploy:
+   - `DATABASE_URL` → a PostgreSQL URL (persists data)
+   - `GEMINI_API_KEY` → enables AI features
+
+Everything below is the detailed version of these steps.
+
+---
+
 ## 1. How it fits together
 
 | Piece | File |
