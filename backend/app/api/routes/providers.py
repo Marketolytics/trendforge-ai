@@ -71,7 +71,16 @@ def set_key(name: str, payload: KeyPayload) -> dict:
     if name not in PROVIDERS:
         raise HTTPException(status_code=404, detail="Unknown provider")
     if not credentials.set_key(name, payload.key.strip()):
-        raise HTTPException(status_code=500, detail="Could not store key in the OS credential store")
+        env_name = f"{name.upper()}_API_KEY"
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "This deployment has no secure credential store, so the key can't be "
+                f"saved from here. Set the {env_name} environment variable in your "
+                "hosting settings (e.g. Vercel → Settings → Environment Variables), "
+                "then redeploy."
+            ),
+        )
     return {"ok": True, "key_set": True}
 
 

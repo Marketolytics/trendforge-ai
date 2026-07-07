@@ -161,3 +161,4 @@ Migrations are additive and non-destructive, so this is always safe to re-run.
 | API calls 404 | Confirm the `/api/(.*)` rewrite in `vercel.json` and that FastAPI routes are under `/api`. |
 | Blank page on refresh of a route | The `index.html` fallback rewrite handles this; redeploy if `vercel.json` changed. |
 | AI request times out | Increase `maxDuration` (plan permitting) or generate smaller units of work. |
+| "API key can't be stored" when saving in Settings | Expected on serverless — there's no OS credential store. Set `GEMINI_API_KEY` as an environment variable and redeploy instead of saving from the UI. Not a database issue. |
