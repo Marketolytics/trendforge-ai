@@ -10,6 +10,17 @@ python-multipart>=0.0.9
 keyring>=25.0.0
 google-genai>=1.0.0
 
+# Production databases (switch via DATABASE_URL):
+#   PostgreSQL (Vercel / Neon / Supabase) via psycopg3
+psycopg[binary]>=3.1.0
+#   MySQL (e.g. Hostinger) — pure-Python driver, no compiler
+PyMySQL>=1.1.0
+cryptography>=42.0.0        # required for MySQL 8 caching_sha2_password auth
+
+# WSGI bridge so the ASGI app runs under Hostinger's Passenger (passenger_wsgi.py).
+# Not used on Vercel (which serves the ASGI app directly).
+a2wsgi>=1.10.0
+
 # Dev / testing
 pytest>=8.0.0
 pytest-asyncio>=0.23.0

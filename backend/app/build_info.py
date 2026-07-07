@@ -1,8 +1,8 @@
 """Build metadata.
 
-At release time ``scripts/build_release.ps1`` writes ``build_info.json`` next to
-the backend root; it is bundled into the packaged app. In development the file
-is absent and sensible defaults are returned.
+A deployment/CI pipeline may write ``build_info.json`` next to the backend root
+to record version, build date, commit and channel. In development the file is
+absent and sensible defaults are returned.
 """
 
 from __future__ import annotations

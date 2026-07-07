@@ -21,11 +21,6 @@
 - **Update checker is opt-in.** Update checks only run if you set an update URL in
   Settings → Advanced. TrendForge never auto-updates and needs no online account.
 
-- **Antivirus false positives.** Freshly built, unsigned executables (the bundled
-  backend / installer) may be flagged by SmartScreen or antivirus until the
-  reputation builds or the binaries are code-signed. Signing is recommended for
-  public distribution.
-
-- **First launch on locked-down machines.** If `%LOCALAPPDATA%` isn't writable,
-  TrendForge falls back to the user home directory or a portable folder beside the
-  executable. Check the Developer panel for the resolved workspace path.
+- **Workspace must be writable.** The backend writes its workspace to
+  `backend/data/` (or `TRENDFORGE_DATA_DIR`). If that path isn't writable the
+  backend fails to start — check the Developer panel / logs for the resolved path.

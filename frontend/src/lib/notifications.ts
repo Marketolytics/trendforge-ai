@@ -1,4 +1,4 @@
-/** Desktop notifications with a local enable flag and permission handling. */
+/** Browser notifications (Web Notifications API) with a local enable flag. */
 
 const KEY = "tf_notifications";
 

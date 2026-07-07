@@ -213,9 +213,19 @@ async def _worker() -> None:
 
 
 def start_worker() -> None:
+    """Start the background worker on the running event loop, if any.
+
+    Safe to call when no loop is running (e.g. during synchronous/WSGI import
+    time initialization): it becomes a no-op and the worker is started lazily on
+    the first request that runs inside the serving event loop.
+    """
     global _worker_task
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return
     if _worker_task is None or _worker_task.done():
-        _worker_task = asyncio.create_task(_worker())
+        _worker_task = loop.create_task(_worker())
 
 
 def resume_pending() -> int:

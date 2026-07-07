@@ -18,6 +18,9 @@ log = get_logger("trendforge.ai.service")
 
 MAX_ATTEMPTS = 3
 BASE_BACKOFF = 1.5
+# Cap how long we honor a server-suggested rate-limit delay, so a single
+# generation never hangs excessively while still recovering from short limits.
+MAX_RETRY_WAIT = 20.0
 
 
 class AINotConfiguredError(Exception):
@@ -71,7 +74,7 @@ class AIService:
                     "generation ok",
                     provider=provider.name,
                     model=model,
-                    category=category,
+                    task=category,
                     label=label,
                     attempt=attempt,
                     prompt_tokens=result.prompt_tokens,
@@ -91,9 +94,13 @@ class AIService:
                     error=str(exc),
                 )
                 if attempt < MAX_ATTEMPTS:
-                    await asyncio.sleep(BASE_BACKOFF * attempt)
+                    # Honor the server's suggested delay for rate limits (capped),
+                    # otherwise use exponential backoff.
+                    retry_after = getattr(exc, "retry_after", None)
+                    delay = min(retry_after, MAX_RETRY_WAIT) if retry_after else BASE_BACKOFF * attempt
+                    await asyncio.sleep(delay)
 
-        raise AIGenerationError(f"Generation failed after {MAX_ATTEMPTS} attempts: {last_error}")
+        raise AIGenerationError(str(last_error))
 
 
 ai_service = AIService()

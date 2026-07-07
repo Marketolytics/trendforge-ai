@@ -16,6 +16,9 @@ venv/
 *.sqlite
 *.sqlite3
 
+# Local runtime workspace (SQLite DB, logs, cache, exports, backups, projects)
+backend/data/
+
 # Node
 node_modules/
 dist/
@@ -23,15 +26,9 @@ dist-ssr/
 *.local
 .vite/
 
-# Tauri / Rust
-target/
-Cargo.lock
-
 # Build artifacts
 build/
 *.tsbuildinfo
-frontend/src-tauri/binaries/
-frontend/src-tauri/gen/
 backend/build_info.json
 
 # Editor / OS

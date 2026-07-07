@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import AsyncIterator
 
@@ -88,7 +89,7 @@ class GeminiProvider(AIProvider):
         try:
             resp = await client.aio.models.generate_content(model=model, contents=prompt, config=config)
         except errors.APIError as exc:
-            raise ProviderError(f"Gemini error ({getattr(exc, 'code', '?')}): {exc}") from exc
+            raise _friendly_error(exc) from exc
         text = resp.text or ""
         usage = getattr(resp, "usage_metadata", None)
         return GenerationResult(
@@ -107,3 +108,33 @@ class GeminiProvider(AIProvider):
         async for chunk in stream:
             if chunk.text:
                 yield chunk.text
+
+
+def _friendly_error(exc: errors.APIError) -> ProviderError:
+    """Turn a raw Gemini APIError into a concise, user-facing ProviderError."""
+    code = getattr(exc, "code", None)
+    raw = str(exc)
+
+    if code == 429:
+        m = re.search(r"retry in (\d+(?:\.\d+)?)s", raw)
+        retry_after = float(m.group(1)) if m else None
+        return ProviderError(
+            "Gemini rate limit reached. The free tier allows only a few requests per "
+            "minute — wait a moment and try again, or upgrade your plan / switch model "
+            "in Settings → AI Provider.",
+            code=429,
+            retry_after=retry_after,
+        )
+    if code in (400, 401, 403):
+        return ProviderError(
+            "Gemini rejected the request. Check your API key and selected model in "
+            "Settings → AI Provider.",
+            code=code,
+        )
+    if code in (500, 502, 503, 504):
+        return ProviderError(
+            "Gemini is temporarily unavailable. Please try again in a moment.", code=code
+        )
+    # Fallback: keep the first line only so we never surface a giant JSON blob.
+    short = raw.split("\n", 1)[0][:200]
+    return ProviderError(f"Gemini error ({code}): {short}", code=code)

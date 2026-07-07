@@ -1,7 +1,7 @@
 # TrendForge AI — Backend API
 
-Base URL: `http://127.0.0.1:8756`
-Interactive docs (OpenAPI/Swagger): `http://127.0.0.1:8756/docs`
+Base URL: `http://localhost:8000`
+Interactive docs (OpenAPI/Swagger): `http://localhost:8000/docs`
 
 All endpoints are local, unauthenticated, and JSON.
 

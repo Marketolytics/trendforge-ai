@@ -39,7 +39,23 @@ class GenerationResult:
 
 
 class ProviderError(Exception):
-    """Raised for provider-level failures (network, auth, bad response)."""
+    """Raised for provider-level failures (network, auth, bad response).
+
+    ``code`` carries the provider/HTTP status when known, and ``retry_after``
+    the server-suggested delay (seconds) for rate-limit errors so the caller
+    can back off intelligently.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: int | str | None = None,
+        retry_after: float | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.retry_after = retry_after
 
 
 class NotConfiguredError(ProviderError):

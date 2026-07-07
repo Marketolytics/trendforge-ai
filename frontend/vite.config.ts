@@ -3,25 +3,33 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 
-const host = process.env.TAURI_DEV_HOST;
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Base public path for assets. Default "/" (served at domain root). For a
+  // subdirectory deploy set VITE_BASE, e.g. "/app/". Client-side routing needs
+  // an absolute base so assets resolve from the same place on every route.
+  base: process.env.VITE_BASE || "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Tauri expects a fixed port and fails if that port is unavailable.
-  clearScreen: false,
+  build: {
+    outDir: "dist",
+    sourcemap: false,
+    chunkSizeWarningLimit: 900,
+  },
   server: {
     port: 5173,
     strictPort: true,
-    host: host || false,
-    hmr: host ? { protocol: "ws", host, port: 1421 } : undefined,
-    watch: {
-      ignored: ["**/src-tauri/**"],
+    // Proxy API calls to the FastAPI backend during development so the app can
+    // use same-origin relative URLs and avoid CORS entirely.
+    proxy: {
+      "/api": {
+        target: process.env.VITE_API_PROXY_TARGET || "http://localhost:8000",
+        changeOrigin: true,
+      },
     },
   },
 });

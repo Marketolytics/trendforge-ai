@@ -67,7 +67,7 @@ def list_workflows() -> list[WorkflowOut]:
 
 
 @router.post("/jobs", response_model=JobOut, status_code=201)
-def create_job(payload: JobCreate) -> JobOut:
+async def create_job(payload: JobCreate) -> JobOut:
     try:
         job = orchestrator.create_job(
             payload.workflow,
@@ -79,6 +79,10 @@ def create_job(payload: JobCreate) -> JobOut:
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    # Ensure the background worker is running on the current event loop. This
+    # makes the queue work under both uvicorn (started at lifespan) and Passenger
+    # /WSGI (started lazily here, inside the serving loop).
+    orchestrator.start_worker()
     orchestrator.enqueue(job["id"], payload.priority)
     return JobOut.model_validate(job)
 

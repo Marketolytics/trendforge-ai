@@ -59,7 +59,7 @@ from app.schemas.ai import (
 from app.services.ai.formats import DEFAULT_FORMAT, get_format
 from app.services.ai.gemini_service import gemini_service
 from app.services.ai.prompt_manager import prompt_manager
-from app.services.ai.response_parser import parse_into
+from app.services.ai.response_parser import ResponseParseError, parse_into
 from app.services.intelligence.patterns import patterns_summary_text
 
 log = get_logger("trendforge.ai.analyzer")
@@ -365,6 +365,36 @@ def _envelope(kind: str, trend_id: int, variant: str, row_payload: dict, stored:
     }
 
 
+# How many times to regenerate when the model returns unparseable JSON.
+PARSE_RETRIES = 2
+
+
+async def _generate_and_parse(rendered: str, template, spec, kind: str):
+    """Call the model and parse its response, regenerating on parse failure.
+
+    Models occasionally emit malformed JSON. A fresh generation usually
+    succeeds, so retry parse failures before giving up.
+    """
+    last_exc: ResponseParseError | None = None
+    for attempt in range(1, PARSE_RETRIES + 1):
+        raw = await gemini_service.generate_json(
+            rendered, temperature=template.temperature, label=kind
+        )
+        try:
+            return raw, parse_into(raw, spec.schema)
+        except ResponseParseError as exc:
+            last_exc = exc
+            log_ai(
+                "response parse failed",
+                kind=kind,
+                attempt=attempt,
+                retrying=attempt < PARSE_RETRIES,
+                error=str(exc),
+            )
+    assert last_exc is not None
+    raise last_exc
+
+
 async def generate(
     trend_id: int,
     kind: str,
@@ -398,8 +428,7 @@ async def generate(
     rendered, template = prompt_manager.render(spec.prompt, context)
 
     start = time.perf_counter()
-    raw = await gemini_service.generate_json(rendered, temperature=template.temperature, label=kind)
-    model = parse_into(raw, spec.schema)
+    raw, model = await _generate_and_parse(rendered, template, spec, kind)
     generation_ms = int((time.perf_counter() - start) * 1000)
     data = model.model_dump()
 

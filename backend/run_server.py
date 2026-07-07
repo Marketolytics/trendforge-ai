@@ -1,11 +1,12 @@
-"""Portable server entrypoint.
+"""Server entrypoint.
 
-Runs the FastAPI app with a configurable host/port. This is the entrypoint the
-desktop launcher (Tauri) spawns — both in development (via Python) and in a
-packaged build (via the PyInstaller-built sidecar executable).
+Runs the FastAPI app with a configurable host/port. Useful for production-style
+runs without auto-reload. For local development prefer:
+
+    uvicorn app.main:app --reload
 
 Usage:
-    python run_server.py --host 127.0.0.1 --port 8756
+    python run_server.py --host 127.0.0.1 --port 8000
 """
 
 from __future__ import annotations
@@ -28,7 +29,7 @@ def main() -> None:
     # Ensure the workspace exists before serving (first-run safe).
     settings.ensure_dirs()
 
-    # Import the app object directly so this works when frozen (no reload).
+    # Import the app object directly (no reload for production-style runs).
     from app.main import app
 
     print(f"TrendForge backend starting on http://{args.host}:{args.port}", file=sys.stderr, flush=True)

@@ -57,41 +57,55 @@ def configure_logging() -> None:
     if _CONFIGURED:
         return
 
-    log_dir = settings.resolved_log_dir
-    log_dir.mkdir(parents=True, exist_ok=True)
-
     level = getattr(logging, settings.log_level.upper(), logging.INFO)
     root = logging.getLogger()
     root.setLevel(level)
 
     json_fmt = JsonFormatter()
 
-    # Rotating combined log (5 files x 2 MB).
-    app_handler = RotatingFileHandler(
-        log_dir / "trendforge.log", maxBytes=2_000_000, backupCount=5, encoding="utf-8"
-    )
-    app_handler.setFormatter(json_fmt)
-    app_handler.setLevel(level)
-
-    # Dedicated error log (WARNING and above).
-    err_handler = RotatingFileHandler(
-        log_dir / "errors.log", maxBytes=2_000_000, backupCount=5, encoding="utf-8"
-    )
-    err_handler.setFormatter(json_fmt)
-    err_handler.setLevel(logging.WARNING)
-
-    # Human-readable console output.
-    console = logging.StreamHandler()
-    console.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-    )
-    console.setLevel(level)
-
     # Avoid duplicate handlers on reload.
     root.handlers.clear()
-    root.addHandler(app_handler)
-    root.addHandler(err_handler)
-    root.addHandler(console)
+
+    # On serverless hosts (Vercel) the filesystem is read-only/ephemeral, so log
+    # structured JSON to stdout — the platform captures it. Elsewhere, also write
+    # rotating files for local inspection.
+    if settings.is_serverless:
+        stdout = logging.StreamHandler()
+        stdout.setFormatter(json_fmt)
+        stdout.setLevel(level)
+        root.addHandler(stdout)
+    else:
+        try:
+            log_dir = settings.resolved_log_dir
+            log_dir.mkdir(parents=True, exist_ok=True)
+
+            # Rotating combined log (5 files x 2 MB).
+            app_handler = RotatingFileHandler(
+                log_dir / "trendforge.log", maxBytes=2_000_000, backupCount=5, encoding="utf-8"
+            )
+            app_handler.setFormatter(json_fmt)
+            app_handler.setLevel(level)
+
+            # Dedicated error log (WARNING and above).
+            err_handler = RotatingFileHandler(
+                log_dir / "errors.log", maxBytes=2_000_000, backupCount=5, encoding="utf-8"
+            )
+            err_handler.setFormatter(json_fmt)
+            err_handler.setLevel(logging.WARNING)
+
+            root.addHandler(app_handler)
+            root.addHandler(err_handler)
+        except OSError:
+            # Read-only FS we didn't detect — fall back to stdout only.
+            pass
+
+        # Human-readable console output for local development.
+        console = logging.StreamHandler()
+        console.setFormatter(
+            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+        )
+        console.setLevel(level)
+        root.addHandler(console)
 
     # Tame noisy third-party loggers.
     logging.getLogger("httpx").setLevel(logging.WARNING)

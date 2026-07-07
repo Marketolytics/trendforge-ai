@@ -3,11 +3,12 @@
  * All backend communication funnels through here.
  */
 
-const DEFAULT_BASE_URL = "http://127.0.0.1:8756";
+// Default to same-origin. In development the Vite dev server proxies `/api`
+// to the FastAPI backend (see vite.config.ts), and in production the frontend
+// and backend can be served together. Set VITE_API_BASE_URL to target a
+// backend on a different origin (e.g. "http://localhost:8000").
+const DEFAULT_BASE_URL = "";
 
-// The backend URL is resolved at startup (auto-discovered under Tauri, or the
-// default in the browser). It's mutable so the desktop launcher can point the
-// UI at whichever local port the backend actually bound to.
 let _apiBaseUrl =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? DEFAULT_BASE_URL;
 

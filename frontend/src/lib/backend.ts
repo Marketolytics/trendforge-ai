@@ -1,31 +1,19 @@
 /**
- * Backend auto-discovery and readiness.
+ * Backend readiness.
  *
- * In the browser we use the default local URL. Inside the Tauri desktop shell
- * the Rust launcher spawns the backend on a free port and exposes it via the
- * `get_backend_url` command, so the UI never needs a manually-entered URL.
+ * This is a pure web application: the frontend talks to the FastAPI backend
+ * over HTTP. In development the Vite dev server proxies `/api` to the backend,
+ * and in production both can be served from the same origin. The API base URL
+ * can be overridden via the `VITE_API_BASE_URL` environment variable.
  */
 
-import { getApiBaseUrl, setApiBaseUrl } from "@/lib/api";
+import { getApiBaseUrl } from "@/lib/api";
 
-export function isTauri(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    ("__TAURI_INTERNALS__" in window || "__TAURI__" in window)
-  );
-}
-
-/** Ask the desktop launcher which URL the backend bound to (Tauri only). */
+/**
+ * Resolve the backend base URL. Kept for API compatibility with the startup
+ * flow; the URL is configured statically via the environment / dev proxy.
+ */
 export async function resolveBackendUrl(): Promise<string> {
-  if (isTauri()) {
-    try {
-      const { invoke } = await import("@tauri-apps/api/core");
-      const url = await invoke<string>("get_backend_url");
-      if (url) setApiBaseUrl(url);
-    } catch {
-      /* fall back to the default URL */
-    }
-  }
   return getApiBaseUrl();
 }
 

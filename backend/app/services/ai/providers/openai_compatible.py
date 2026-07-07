@@ -93,7 +93,28 @@ class OpenAICompatibleProvider(AIProvider):
                 resp.raise_for_status()
                 data = resp.json()
         except httpx.HTTPStatusError as exc:
-            raise ProviderError(f"{self.label} error: HTTP {exc.response.status_code}") from exc
+            status = exc.response.status_code
+            if status == 429:
+                retry_after = None
+                header = exc.response.headers.get("retry-after")
+                if header:
+                    try:
+                        retry_after = float(header)
+                    except ValueError:
+                        retry_after = None
+                raise ProviderError(
+                    f"{self.label} rate limit reached. Wait a moment and try again, "
+                    "or check your plan.",
+                    code=429,
+                    retry_after=retry_after,
+                ) from exc
+            if status in (400, 401, 403):
+                raise ProviderError(
+                    f"{self.label} rejected the request. Check your API key and model "
+                    "in Settings → AI Provider.",
+                    code=status,
+                ) from exc
+            raise ProviderError(f"{self.label} error: HTTP {status}", code=status) from exc
         except Exception as exc:  # noqa: BLE001
             raise ProviderError(f"{self.label} request failed: {exc}") from exc
 
