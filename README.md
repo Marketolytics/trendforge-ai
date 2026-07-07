@@ -17,6 +17,8 @@ TrendForge collects trending topics from multiple sources, analyzes them with AI
 
 Runs on localhost with no desktop runtime, no Docker, and no cloud required.
 Deploys with only configuration changes to:
+- **Render** (single always-on service, all features incl. background jobs,
+  PostgreSQL) — see [docs/DEPLOYMENT_RENDER.md](docs/DEPLOYMENT_RENDER.md) *(recommended for full functionality)*
 - **Vercel** (static frontend + FastAPI serverless function, PostgreSQL) — see
   [docs/DEPLOYMENT_VERCEL.md](docs/DEPLOYMENT_VERCEL.md)
 - **Hostinger shared hosting** (Passenger, MySQL) — see

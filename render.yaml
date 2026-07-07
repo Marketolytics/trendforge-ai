@@ -1,0 +1,30 @@
+# Render Blueprint for TrendForge AI.
+# Creates one always-on web service (FastAPI + built frontend + background job
+# worker) and a managed PostgreSQL database. In Render: New → Blueprint → pick
+# this repo, then set GEMINI_API_KEY when prompted.
+
+databases:
+  - name: trendforge-db
+    databaseName: trendforge
+    plan: free            # upgrade to "starter" for production (free expires in 90 days)
+
+services:
+  - type: web
+    name: trendforge
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free            # upgrade to "starter" to stay always-on (background jobs 24/7)
+    healthCheckPath: /api/health
+    autoDeploy: true      # redeploy on every push to the connected branch
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trendforge-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true          # Render generates a random secret
+      - key: GEMINI_API_KEY
+        sync: false                  # set this yourself in the dashboard (secret)
+      # ALLOWED_ORIGINS is unnecessary — the UI is served from the same origin.
